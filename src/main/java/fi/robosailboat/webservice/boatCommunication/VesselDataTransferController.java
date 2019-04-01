@@ -13,7 +13,8 @@ public class VesselDataTransferController {
     @PostMapping(value = "/sensorData", consumes = "application/json", produces = "application/json")
     @ResponseBody
     public Command postData(@RequestBody SensorData values ){
-    LOG.info("fetched sensorData. Gps latitud: " + values.getLatitud()+ " | Gps longitud: " + values.getLongitud()
+    LOG.info("Fetched sensorData. Time: "+values.getTimeStamp()+" | Gps latitud: "
+            + values.getLatitud()+ " | Gps longitud: " + values.getLongitud()
             + " | Compass direction: "+ values.getDirection());
 
     return new Command(values.getLatitud(),values.getLongitud());
