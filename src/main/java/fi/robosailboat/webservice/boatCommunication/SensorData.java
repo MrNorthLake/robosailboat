@@ -5,8 +5,6 @@ import lombok.Data;
 @Data
 public class SensorData {
 
-    private final String timeStamp;
-    private final int latitud;
-    private final int longitud;
+    private final GpsPoint gpsPoint;
     private final int direction;
 }
