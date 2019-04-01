@@ -13,9 +13,9 @@ public class VesselDataTransferController {
     @PostMapping(value = "/postData", consumes = "application/json", produces = "application/json")
     @ResponseBody
     public Command postData(@RequestBody DataInputParams params ){
-    LOG.info("entered postData. value1: " + params.getOne()+ " | value2: " + params.getTwo());
+    LOG.info("entered postData. value1: " + params.getEtt()+ " | value2: " + params.getTvo());
 
-    return new Command(params.getOne(),params.getTwo());
+    return new Command(params.getEtt(),params.getTvo());
     }
 
 }

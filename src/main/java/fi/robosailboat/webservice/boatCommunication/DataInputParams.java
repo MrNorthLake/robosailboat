@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class DataInputParams {
 
-    private final int one;
-    private final int two;
+    private final int ett;
+    private final int tvo;
 }
