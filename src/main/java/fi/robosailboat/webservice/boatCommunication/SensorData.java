@@ -2,10 +2,15 @@ package fi.robosailboat.webservice.boatCommunication;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class SensorData {
 
-    private final int latitud;
-    private final int longitud;
-    private final int direction;
+    private final BigDecimal latitud;
+    private final BigDecimal longitud;
+    private final BigDecimal direction;
+    private final BigDecimal track;
+    private final BigDecimal nrOfSatelites;
+    private final BigDecimal compassHeading;
 }

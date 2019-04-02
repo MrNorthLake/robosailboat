@@ -16,7 +16,8 @@ public class VesselDataTransferController {
     LOG.info("fetched sensorData. Gps latitud: " + values.getLatitud()+ " | Gps longitud: " + values.getLongitud()
             + " | Compass direction: "+ values.getDirection());
 
-    return new Command(values.getLatitud(),values.getLongitud());
+
+    return new Command(123,321);
     }
 
 }
