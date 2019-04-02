@@ -1,4 +1,4 @@
-package fi.robosailboat.webservice.boatCommunication;
+package fi.robosailboat.webservice.boatCommunication.dto;
 
 import lombok.Data;
 
