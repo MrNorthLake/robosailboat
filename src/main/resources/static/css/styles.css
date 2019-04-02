@@ -1,0 +1,18 @@
+.wrapper {
+  display: flex;  
+  flex-flow: row wrap;
+  text-align: center;
+}
+
+.wrapper > * {
+  padding: 5px;
+  flex: 1 100%;
+}
+
+.main {
+  text-align: left;
+}
+
+.history {
+  text-align: left;
+}
