@@ -13,4 +13,5 @@ public class SensorData {
     private final BigDecimal track;
     private final int nrOfSatelites;
     private final BigDecimal compassHeading;
+
 }
