@@ -14,8 +14,8 @@ public class VesselDataTransferController {
 
     private static Logger LOG = LoggerFactory.getLogger(VesselDataTransferController.class);
 
-    @Autowired
-    private LoggingRepository loggingRepo;
+    /*@Autowired
+    private LoggingRepository loggingRepo;*/
 
     @PostMapping(value = "/sensorData", consumes = "application/json", produces = "application/json")
     @ResponseBody
@@ -24,7 +24,7 @@ public class VesselDataTransferController {
                 + " | Compass direction: " + values.getDirection());
 
         /*this is just for testing*/
-        loggingRepo.insert(values);
+       // loggingRepo.insert(values);
 
         return new Command(123, 321);
     }
