@@ -14,8 +14,8 @@ public class VesselDataTransferController {
 
     private static Logger LOG = LoggerFactory.getLogger(VesselDataTransferController.class);
 
-    /*@Autowired
-    private LoggingRepository loggingRepo;*/
+    @Autowired
+    private LoggingRepository loggingRepo;
 
     @PostMapping(value = "/sensorData", consumes = "application/json", produces = "application/json")
     @ResponseBody
@@ -23,8 +23,8 @@ public class VesselDataTransferController {
         LOG.info("fetched sensorData. Gps latitud: " + values.getLatitude() + " | Gps longitud: " + values.getLongitude()
                 + " | Compass direction: " + values.getDirection());
 
-        /*this is just for testing*/
-       // loggingRepo.insert(values);
+       /* this is just for testing*/
+        loggingRepo.insert(values);
 
         return new Command(123, 321);
     }
