@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="UTF-8">
     <title>TRTS</title>
@@ -12,7 +12,7 @@
       </header>
       <article class="main">
         <h2>Current data:</h2>
-        <p>Wind:</p>
+        <p>Wind: </p><p th:text="${title}"></p>
         <p>Heading:</p>
         <p>Position:</p>
       </article>
