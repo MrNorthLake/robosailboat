@@ -17,7 +17,7 @@ public class ValidatorTest {
     public void distanceBetweenTest() {
         SensorData one = new SensorData(60.105381, 19.944503, 0, 0, 0, 0);
         SensorData two = new SensorData(60.098792, 19.947658, 0, 0, 0, 0);
-        Validator validator = new Validator(one , two, 1);
+        Validator validator = new Validator(one , two, 1, 2.3);
 
         double result = validator.distanceBetween(60.105381, 19.944503,
                 60.098792, 19.947658);

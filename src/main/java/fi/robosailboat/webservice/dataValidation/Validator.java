@@ -19,7 +19,7 @@ public class Validator {
     double maxDirectionDiff; // Max difference in direction
 
 
-    public Validator(SensorData latestData, SensorData expectedData, int maxDistanceDiff, int maxDirectionDiff) {
+    public Validator(SensorData latestData, SensorData expectedData, int maxDistanceDiff, double maxDirectionDiff) {
         this.latestData = latestData;
         this.expectedData = expectedData;
         this.maxDistanceDiff = maxDistanceDiff;
