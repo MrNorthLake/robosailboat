@@ -12,10 +12,10 @@ public class SensorData {
 
     @Id
     private String id;
-    private final BigDecimal latitude;
-    private final BigDecimal longitude;
-    private final BigDecimal direction;
-    private final BigDecimal track;
+    private final double latitude;
+    private final double longitude;
+    private final double direction;
+    private final double track;
     private final int nrOfSatelites;
-    private final BigDecimal compassHeading;
+    private final double compassHeading;
 }
