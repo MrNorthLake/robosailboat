@@ -51,11 +51,8 @@ public class Validator {
         double lat2InRadian = Math.toRadians(lat2);
         double deltaLongitudeRadians = Math.toRadians(lon2 - lon1);
 
-        double a = Math.sin(deltaLatitudeRadians/2)
-                * Math.sin(deltaLatitudeRadians/2)
-                + Math.cos(lat1Radians)
-                * Math.cos(lat2InRadian)
-                * Math.sin(deltaLongitudeRadians/2)
+        double a = Math.sin(deltaLatitudeRadians/2) * Math.sin(deltaLatitudeRadians/2)
+                + Math.cos(lat1Radians) * Math.cos(lat2InRadian) * Math.sin(deltaLongitudeRadians/2)
                 * Math.sin(deltaLongitudeRadians/2);
 
         double b = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
