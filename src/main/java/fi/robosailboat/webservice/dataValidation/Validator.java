@@ -36,6 +36,10 @@ public class Validator {
             System.out.println("Notify boat communication component to send route modifications!");
         }
 
+        /*To do:
+        * Check if direction difference is too big
+        * */
+
     }
 
     /*Return distance in meters between two Gps points. Reused code from sailingrobot github*/
