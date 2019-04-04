@@ -12,4 +12,9 @@ public class WebController {
         model.addAttribute("wind", "wind test");
         return "index";
     }
+
+    @RequestMapping("/log")
+    public String log() {
+        return "log";
+    }
 }
