@@ -10,6 +10,6 @@ public class WebController {
     @RequestMapping("/")
     public String home(Model model) {
         model.addAttribute("wind", "wind test");
-        return "home";
+        return "index";
     }
 }
