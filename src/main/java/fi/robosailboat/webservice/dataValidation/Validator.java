@@ -2,6 +2,7 @@ package fi.robosailboat.webservice.dataValidation;
 
 import fi.robosailboat.webservice.boatCommunication.SensorData;
 
+import javax.validation.constraints.Max;
 import java.math.BigDecimal;
 
 /*
@@ -14,31 +15,27 @@ public class Validator {
 
     private SensorData latestData;
     private SensorData expectedData;
-    int maxDiff; // Max differenece in percentage
+    int maxDistanceDiff; // Max distance difference between latest and expected in meters
+    double maxDirectionDiff; // Max difference in direction
 
 
-    public Validator(SensorData latestData, SensorData expectedData, int maxDiff) {
+    public Validator(SensorData latestData, SensorData expectedData, int maxDistanceDiff, int maxDirectionDiff) {
         this.latestData = latestData;
         this.expectedData = expectedData;
-        this.maxDiff = maxDiff;
+        this.maxDistanceDiff = maxDistanceDiff;
+        this.maxDirectionDiff = maxDirectionDiff;
     }
 
     public void validate(){
 
-        BigDecimal dirDiff = latestData.getDirection().subtract(expectedData.getDirection()).abs();
-        BigDecimal latDiff = latestData.getLatitud().subtract(expectedData.getLatitud()).abs();
-        BigDecimal lonDiff = latestData.getLongitud().subtract(expectedData.getLongitud()).abs();
-        BigDecimal comDiff = latestData.getCompassHeading().subtract(expectedData.getCompassHeading()).abs();
+        double distanceDiff = distanceBetween(latestData.getLatitud(), latestData.getLongitud(),
+                expectedData.getLatitud(), expectedData.getLongitud());
 
-        BigDecimal differenceSum = dirDiff.add(latDiff).add(lonDiff).add(comDiff);
-        BigDecimal expectedSum = expectedData.getDirection().add(expectedData.getLatitud())
-                .add(expectedData.getLongitud()).add(expectedData.getCompassHeading());
-
-        BigDecimal diffPercentage = differenceSum.divide(expectedSum).multiply(new BigDecimal(100));
-
-        if(diffPercentage.intValue() > maxDiff){
-            System.out.println("To big off a difference. Send route modification to boat!");
+        if(distanceDiff > maxDistanceDiff){
+            //Distance is bigger than max value
+            System.out.println("Notify boat communication component to send route modifications!");
         }
+
     }
 
     /*Return distance in meters between two Gps points. Reused code from sailingrobot github*/
