@@ -33,13 +33,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and().sessionManagement().disable();
     }
 
+    @Override
+    public void configure(AuthenticationManagerBuilder builder) throws Exception {
+        builder.userDetailsService(userDetailsService);
+    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    @Override
-    public void configure(AuthenticationManagerBuilder builder) throws Exception {
-        builder.userDetailsService(userDetailsService);
-    }
+
 }
