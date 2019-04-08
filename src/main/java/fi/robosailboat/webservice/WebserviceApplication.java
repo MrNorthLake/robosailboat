@@ -1,6 +1,6 @@
 package fi.robosailboat.webservice;
 
-import fi.robosailboat.webservice.robosailboatLib.util.PasswordCreator;
+//import fi.robosailboat.webservice.robosailboatLib.util.PasswordCreator;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
