@@ -21,7 +21,7 @@ public class WebController {
 
     @RequestMapping("/")
     public String home(Model model) {
-        SensorData latestData = db.findTopByOrderByCreatedDesc();
+        SensorData latestData = loggingRepository.findTopByOrderByCreatedDesc();
         model.addAttribute("wind", "wind test");
         model.addAttribute("heading", latestData.getCompassHeading());
         model.addAttribute("position", latestData.getLatitude()+", "+latestData.getLongitude());
