@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/dataTransfer")
 public class VesselDataTransferController {
@@ -20,11 +22,15 @@ public class VesselDataTransferController {
     @PostMapping(value = "/sensorData", consumes = "application/json", produces = "application/json")
     @ResponseBody
     public Command postData(@RequestBody SensorData values) {
-        LOG.info("fetched sensorData. Gps latitud: " + values.getLatitude() + " | Gps longitud: " + values.getLongitude()
-                + " | Compass direction: " + values.getDirection());
+
 
        /* this is just for testing*/
         loggingRepo.insert(values);
+        SensorData latestData = loggingRepo.findTopByOrderByCreatedDesc();
+
+        LOG.info("Latest sensorData. Gps latitud: " + latestData.getLatitude() + " | Gps longitud: " + latestData.getLongitude()
+                + " | Compass direction: " + latestData.getDirection());
+
 
         return new Command(123, 321);
     }
