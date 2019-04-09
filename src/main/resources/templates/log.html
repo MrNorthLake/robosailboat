@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8">
     <title>TRTS</title>
@@ -13,10 +13,13 @@
       <article class="main-log">
         <h2>History</h2>
         <section>
-          <p>[Date]</p>
-          <p>Wind:</p>
-          <p>Heading:</p>
-          <p>Position:</p>
+          <ul class="log-list">
+            <li th:each="log : ${logs}">
+              <p class="time">Time: <span th:text="${log.created}"></span></p>
+              <p>Heading: <span th:text="${log.compassHeading}"></span></p>
+              <p>Position: <span th:text="${log.latitude}"></span> <span th:text="${log.longitude}"></span></p>
+            </li>
+          </ul>
         </section>
       </article>
       <aside class="aside aside-1">

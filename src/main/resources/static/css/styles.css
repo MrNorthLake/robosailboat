@@ -23,6 +23,15 @@ body {
   text-align: center;
 }
 
+.log-list {
+    list-style-type: none;
+    text-align: left;
+}
+
+.time {
+    font-weight: bold;
+}
+
 .footer {
   text-align: center;
 }
