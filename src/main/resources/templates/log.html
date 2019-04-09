@@ -8,9 +8,9 @@
   <body>
     <div class="wrapper">
       <header>
-        <h1>TRTS Log</h1>
+        <h1><a class="header_link" href="/">TRTS</a></h1>
       </header>
-      <article class="history">
+      <article class="main-log">
         <h2>History</h2>
         <section>
           <p>[Date]</p>
@@ -19,10 +19,17 @@
           <p>Position:</p>
         </section>
       </article>
-    </div>
-    <h3>Download Log File </h3>
-    <div>
-      <a href="http://localhost:8080/log/download/Log.csv">Logs.csv</a>
+      <aside class="aside aside-1">
+        <h2>Search</h2>
+        <form>
+          <input type="text">
+          <button type="submit">Search</button>
+        </form>
+      </aside>
+      <aside class="aside aside-2">
+        <h2>Download Log File </h2>
+        <a href="http://localhost:8080/log/download/Log.csv">Logs.csv</a>
+      </aside>
     </div>
   </body>
 </html>
