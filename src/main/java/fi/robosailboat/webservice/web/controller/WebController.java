@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -31,9 +32,14 @@ public class WebController {
     }
 
     @RequestMapping("/log")
-    public String log(Model model) {
+    public String log(@RequestParam(value = "from", required = false) String from,
+                      @RequestParam(value = "to", required = false) String to, Model model) {
         List<SensorData> logs = loggingRepository.findAll();
         Collections.reverse(logs);
+
+        if (from != null && to != null && !from.isEmpty() && !to.isEmpty()) {
+            System.out.println(from + " -> " + to);
+        }
 
         model.addAttribute("logs", logs);
         return "log";

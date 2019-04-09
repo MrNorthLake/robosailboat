@@ -24,9 +24,9 @@
       </article>
       <aside class="aside aside-1">
         <h2>Search</h2>
-        <form>
-          <p>Fr: <input type="datetime-local" /></p>
-          <p>To: <input type="datetime-local" /></p>
+        <form action="#" th:action="@{/log}" th:object="${search}">
+          <p>Fr: <input name="from" type="datetime-local" /></p>
+          <p>To: <input name="to" type="datetime-local" /></p>
           <button type="submit">Search</button>
         </form>
       </aside>
