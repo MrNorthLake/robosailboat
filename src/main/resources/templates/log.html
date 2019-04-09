@@ -15,7 +15,7 @@
         <section>
           <ul class="log-list">
             <li th:each="log : ${logs}">
-              <p class="time">Time: <span th:text="${log.created}"></span></p>
+              <p class="time">Time: <span th:text="${#temporals.format(log.created, 'dd-MM-yyyy HH:mm')}"></span></p>
               <p>Heading: <span th:text="${log.compassHeading}"></span></p>
               <p>Position: <span th:text="${log.latitude}"></span> <span th:text="${log.longitude}"></span></p>
             </li>
@@ -25,7 +25,8 @@
       <aside class="aside aside-1">
         <h2>Search</h2>
         <form>
-          <input type="text">
+          <p>Fr: <input type="datetime-local" /></p>
+          <p>To: <input type="datetime-local" /></p>
           <button type="submit">Search</button>
         </form>
       </aside>

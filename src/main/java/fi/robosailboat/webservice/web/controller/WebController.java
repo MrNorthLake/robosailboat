@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -32,6 +33,7 @@ public class WebController {
     @RequestMapping("/log")
     public String log(Model model) {
         List<SensorData> logs = loggingRepository.findAll();
+        Collections.reverse(logs);
 
         model.addAttribute("logs", logs);
         return "log";
