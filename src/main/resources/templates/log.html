@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8">
     <title>TRTS</title>
@@ -8,21 +8,36 @@
   <body>
     <div class="wrapper">
       <header>
-        <h1>TRTS Log</h1>
+        <h1><a class="header_link" href="/">TRTS</a></h1>
       </header>
-      <article class="history">
+      <article class="main-log">
         <h2>History</h2>
         <section>
-          <p>[Date]</p>
-          <p>Wind:</p>
-          <p>Heading:</p>
-          <p>Position:</p>
+          <ul class="log-list">
+            <li th:each="log : ${logs}">
+              <p class="time">Time: <span th:text="${#temporals.format(log.created, 'dd-MM-yyyy HH:mm')}"></span></p>
+              <p>Heading: <span th:text="${log.compassHeading}"></span></p>
+              <p>Position: <span th:text="${log.latitude}"></span> <span th:text="${log.longitude}"></span></p>
+            </li>
+          </ul>
         </section>
       </article>
-    </div>
-    <h3>Download Log File </h3>
-    <div>
-      <a href="http://localhost:8080/log/download/Log.csv">Logs.csv</a>
+      <aside class="aside aside-1">
+        <h2>Search</h2>
+        <form action="#" th:action="@{/log}" th:object="${search}">
+          <p>Fr: <input name="from" type="datetime-local" /></p>
+          <p>To: <input name="to" type="datetime-local" /></p>
+          <button type="submit">Search</button>
+        </form>
+      </aside>
+      <aside class="aside aside-2">
+        <h2>Download Log File </h2>
+        <form action="#" th:action="@{/log/download/Log.csv}" th:object="${download}">
+          <p>Fr: <input name="from" type="datetime-local" /></p>
+          <p>To: <input name="to" type="datetime-local" /></p>
+          <button type="submit">Download Logs.csv</button>
+        </form>
+      </aside>
     </div>
   </body>
 </html>
