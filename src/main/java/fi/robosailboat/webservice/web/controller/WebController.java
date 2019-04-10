@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -36,12 +37,17 @@ public class WebController {
                       @RequestParam(value = "to", required = false) String to, Model model) {
         List<SensorData> logs = loggingRepository.findAll();
         Collections.reverse(logs);
+        model.addAttribute("logs", logs);
 
         if (from != null && to != null && !from.isEmpty() && !to.isEmpty()) {
             System.out.println(from + " -> " + to);
+            LocalDateTime start = LocalDateTime.parse(from);
+            LocalDateTime end = LocalDateTime.parse(to);
+            List<SensorData> logsBetween = loggingRepository.findByCreatedBetween(start, end);
+            Collections.reverse(logsBetween);
+            model.addAttribute("logs", logsBetween);
         }
 
-        model.addAttribute("logs", logs);
         return "log";
     }
 
