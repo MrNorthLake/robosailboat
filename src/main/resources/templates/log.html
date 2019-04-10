@@ -32,7 +32,11 @@
       </aside>
       <aside class="aside aside-2">
         <h2>Download Log File </h2>
-        <a href="http://localhost:8080/log/download/Log.csv">Logs.csv</a>
+        <form action="#" th:action="@{/log/download/Log.csv}" th:object="${download}">
+          <p>Fr: <input name="from" type="datetime-local" /></p>
+          <p>To: <input name="to" type="datetime-local" /></p>
+          <button type="submit">Download Logs.csv</button>
+        </form>
       </aside>
     </div>
   </body>

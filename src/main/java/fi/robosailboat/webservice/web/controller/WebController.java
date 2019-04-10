@@ -53,12 +53,20 @@ public class WebController {
 
 
     @GetMapping("/log/download/Log.csv")
-    public void downloadCSV(HttpServletResponse response) throws IOException {
+    public void downloadCSV(@RequestParam(value = "from", required = false) String from,
+                            @RequestParam(value = "to", required = false) String to,
+                            HttpServletResponse response) throws IOException {
         response.setContentType("text/csv");
         response.setHeader("Content-Disposition", "attachment; file=customers.csv");
 
-        List<SensorData> logs = loggingRepository.findAll();
-
-         WriteDataToCSV.writeDataToCsvUsingStringArray(response.getWriter(), logs);
+        if (from != null && to != null && !from.isEmpty() && !to.isEmpty()) {
+            LocalDateTime start = LocalDateTime.parse(from);
+            LocalDateTime end = LocalDateTime.parse(to);
+            List<SensorData> logsBetween = loggingRepository.findByCreatedBetween(start, end);
+            WriteDataToCSV.writeDataToCsvUsingStringArray(response.getWriter(), logsBetween);
+        } else {
+            List<SensorData> logs = loggingRepository.findAll();
+            WriteDataToCSV.writeDataToCsvUsingStringArray(response.getWriter(), logs);
+        }
     }
 }
