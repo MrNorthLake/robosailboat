@@ -3,6 +3,7 @@ plugins {
     id 'java'
 }
 
+apply plugin: 'java'
 apply plugin: 'io.spring.dependency-management'
 
 group = 'fi.robosailboat'
