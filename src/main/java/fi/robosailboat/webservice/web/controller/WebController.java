@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +31,26 @@ public class WebController {
         model.addAttribute("heading", latestData.getCompassHeading());
         model.addAttribute("position", latestData.getLatitude()+", "+latestData.getLongitude());
         return "index";
+    }
+
+    @RequestMapping(value="/wind", method=RequestMethod.GET)
+    public String getWind(Model model) {
+        model.addAttribute("wind", "wind test");
+        return "index :: #wind";
+    }
+
+    @RequestMapping(value="/heading", method=RequestMethod.GET)
+    public String getHeading(Model model) {
+        SensorData latestData = loggingRepository.findTopByOrderByCreatedDesc();
+        model.addAttribute("heading", latestData.getCompassHeading());
+        return "index :: #heading";
+    }
+
+    @RequestMapping(value="/position", method=RequestMethod.GET)
+    public String getPosition(Model model) {
+        SensorData latestData = loggingRepository.findTopByOrderByCreatedDesc();
+        model.addAttribute("position", latestData.getLatitude()+", "+latestData.getLongitude());
+        return "index :: #position";
     }
 
     @RequestMapping("/log")
