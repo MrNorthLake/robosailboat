@@ -1,20 +1,36 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
   <head>
-    <meta charset="UTF-8" http-equiv="refresh" content="5">
+    <meta charset="UTF-8">
     <title>TRTS</title>
     <link rel="stylesheet" href="css/styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
   <head>
   <body>
+    <script>
+      function updateHeading() {
+        $.get("heading", function(heading) {
+          $("#heading").replaceWith(heading);
+        });
+      }
+      function updatePosition() {
+        $.get("position", function(position) {
+          $("#position").replaceWith(position);
+        });
+      }
+
+      setInterval(updateHeading, 3000);
+      setInterval(updatePosition, 3000);
+    </script>
     <div class="wrapper">
       <header>
         <h1>TRTS Header</h1>
       </header>
       <article class="main">
         <h2>Current data:</h2>
-        <p>Wind: <span th:text="${wind}"/><p/>
-        <p>Heading: <span th:text="${heading}"/></p>
-        <p>Position: <span th:text="${position}"/></p>
+        <p>Wind: <span id="wind" th:text="${wind}"/><p/>
+        <p>Heading: <span id="heading" th:text="${heading}"/></p>
+        <p>Position: <span id="position" th:text="${position}"/></p>
       </article>
     </div>
     <footer class="footer">
