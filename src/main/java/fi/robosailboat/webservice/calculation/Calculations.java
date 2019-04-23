@@ -72,6 +72,7 @@ public class Calculations {
         return phi;
     }
 
+    /* Calculates the course to steer by using the line follow algorithm. Reused code from sailingrobots. */
     public double calculateTargetCourse() {
 
         if(prevWaypointLat == DATA_OUT_OF_RANGE || prevWaypointLon == DATA_OUT_OF_RANGE) {
@@ -188,9 +189,19 @@ public class Calculations {
         return angle;
     }
 
+    /* Limits radian angle range. Reused code from sailingrobots. */
     private double limitRadianAngleRange(double angle) {
-        //TODO
-        return 0;
+        double fullRevolution = 2 * Math.PI;
+        double minAngle = 0;
+
+        while (angle < minAngle) {
+            angle += fullRevolution;
+        }
+        while (angle >= (minAngle + fullRevolution)) {
+            angle -= fullRevolution;
+        }
+
+        return angle;
     }
 
     /* Check if angle is between sectorAngle1 and sectorAngle2, going from 1 to 2 clockwise.
@@ -256,9 +267,46 @@ public class Calculations {
         return meanAngleRadians * 180 / Math.PI;
     }
 
+    /* Calculates signed distance to line. Reused code from sailingrobots. */
     private double calculateSignedDistanceToLine() {
-        //TODO
-        return 0;
+        int earthRadius = 6371000; //meters
+
+        //a
+        double prevWPCoord[] = {
+                earthRadius * Math.cos(prevWaypointLat * Math.PI / 180) * Math.cos(prevWaypointLon * Math.PI / 180),
+                earthRadius * Math.cos(prevWaypointLat * Math.PI / 180) * Math.sin(prevWaypointLon * Math.PI / 180),
+                earthRadius * Math.sin(prevWaypointLat * Math.PI / 180)
+        };
+        //b
+        double nextWPCoord[] = {
+                earthRadius * Math.cos(nextWaypointLat * Math.PI / 180) * Math.cos(nextWaypointLon * Math.PI / 180),
+                earthRadius * Math.cos(nextWaypointLat * Math.PI / 180) * Math.sin(nextWaypointLon * Math.PI / 180),
+                earthRadius * Math.sin(nextWaypointLat * Math.PI / 180)
+        };
+        //m
+        double boatCoord[] = {
+                earthRadius * Math.cos(vesselLat * Math.PI / 180) * Math.cos(vesselLon * Math.PI / 180),
+                earthRadius * Math.cos(vesselLat * Math.PI / 180) * Math.sin(vesselLon * Math.PI / 180),
+                earthRadius * Math.sin(vesselLat * Math.PI / 180)
+        };
+
+        //vector normal to plane
+        double oab[] = {
+                //Vector product: A^B divided by norm ||a^b||     a^b / ||a^b||
+                (prevWPCoord[1] * nextWPCoord[2] - prevWPCoord[2] * nextWPCoord[1]),
+                (prevWPCoord[2] * nextWPCoord[0] - prevWPCoord[0] * nextWPCoord[2]),
+                (prevWPCoord[0] * nextWPCoord[1] - prevWPCoord[1] * nextWPCoord[0])
+        };
+
+        double normOAB = Math.sqrt(Math.pow(oab[0],2) + Math.pow(oab[1],2) + Math.pow(oab[2],2));
+
+        oab[0] = oab[0] / normOAB;
+        oab[1] = oab[1] / normOAB;
+        oab[2] = oab[2] / normOAB;
+
+        double signedDistance = boatCoord[0] * oab[0] + boatCoord[1] * oab[1] + boatCoord[2] * oab[2];
+
+        return signedDistance;
     }
 
     /* Reused code from sailingrobots. */
