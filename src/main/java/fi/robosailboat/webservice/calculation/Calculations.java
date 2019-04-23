@@ -34,11 +34,11 @@ public class Calculations {
     private boolean beatingMode;
 
     public Calculations() {
-        incidenceAngle = 90 * Math.PI / 180;
+        incidenceAngle = (float)(90 * Math.PI / 180);
         maxDistanceFromLine = 20;
 
-        closeHauledAngle = 45 * Math.PI / 180;
-        broadReachAngle = 30 * Math.PI / 180;
+        closeHauledAngle = (float)(45 * Math.PI / 180);
+        broadReachAngle = (float)(30 * Math.PI / 180);
         tackingDistance = 15;
     }
 
