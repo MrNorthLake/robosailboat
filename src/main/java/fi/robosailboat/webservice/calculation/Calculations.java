@@ -1,13 +1,37 @@
 package fi.robosailboat.webservice.calculation;
 
+import java.util.*;
+import java.util.Vector;
+
 public class Calculations {
 
+    private final int DATA_OUT_OF_RANGE = -2000;
     private double prevWaypointLat;
     private double prevWaypointLon;
+    private double prevWaypointRadius;
     private double nextWaypointLat;
     private double nextWaypointLon;
+    private double nextWaypointRadius;
     private double vesselLat;
     private double vesselLon;
+    private double trueWindSpeed;
+    private double trueWindDirection;
+    private Vector<Float> twdBuffer; // True wind direction buffer.
+
+    // Vecteur field parameters
+    private float incidenceAngle;
+    private float maxDistanceFromLine;
+
+    // Beating sailing mode parameters
+    private float closeHauledAngle;
+    private float broadReachAngle;
+    private float tackingDistance;
+
+    // State variable (inout variable)
+    private int tackDirection;
+
+    // Output variables
+    private boolean beatingMode;
 
     public Calculations() {}
 
@@ -46,6 +70,60 @@ public class Calculations {
                 m[1][0] * bMinusA[0] + m[1][1] * bMinusA[1] + m[1][2] * bMinusA[2]);
 
         return phi;
+    }
+
+    public double calculateTargetCourse() {
+
+        if(prevWaypointLat == DATA_OUT_OF_RANGE || prevWaypointLon == DATA_OUT_OF_RANGE) {
+            prevWaypointLat = vesselLat;
+            prevWaypointLon = vesselLon;
+            prevWaypointRadius = 30.0;
+
+        }
+        if (vesselLat == DATA_OUT_OF_RANGE || vesselLon == DATA_OUT_OF_RANGE || trueWindSpeed == DATA_OUT_OF_RANGE ||
+            trueWindDirection == DATA_OUT_OF_RANGE || nextWaypointLat == DATA_OUT_OF_RANGE || nextWaypointLon == DATA_OUT_OF_RANGE ||
+            nextWaypointRadius == DATA_OUT_OF_RANGE) {
+            return DATA_OUT_OF_RANGE;
+        } else {
+            // Calculate the angle of the true wind vector.     [1]:(psi)       [2]:(psi_tw).
+            double meanTrueWindDir = meanOfAngles(twdBuffer);
+            double trueWindAngle = limitRadianAngleRange((meanTrueWindDir * Math.PI / 180) + Math.PI);
+
+            // Calculate signed distance to the line.           [1] and [2]: (e).
+            double signedDistance = calculateSignedDistanceToLine();
+
+            // Calculate the angle of the line to be followed.  [1]:(phi)       [2]:(beta)
+            double phi = calculateAngleOfDesiredTrajectory();
+
+            // Calculate the target course in nominal mode.     [1]:(theta_*)   [2]:(theta_r)
+            double targetCourse = phi + (2 * incidenceAngle / Math.PI) * Math.atan(signedDistance / maxDistanceFromLine);
+            targetCourse = limitRadianAngleRange(targetCourse);
+
+            // Change tack direction when reaching tacking distance
+            if (Math.abs(signedDistance) > tackingDistance) {
+                tackDirection = sgn(signedDistance);
+            }
+
+            // Check if the targetcourse is inconsistent with the wind.
+            if ((Math.cos(trueWindAngle - targetCourse) + Math.cos(closeHauledAngle) < 0) ||
+               ((Math.cos(trueWindAngle - phi) + Math.cos(closeHauledAngle) < 0) && (Math.abs(signedDistance) < maxDistanceFromLine))) {
+                // Close hauled mode (Upwind beating mode).
+                beatingMode = true;
+                targetCourse = Math.PI + trueWindAngle + tackDirection * closeHauledAngle;
+            } else if ((Math.cos(trueWindAngle - targetCourse) - Math.cos(broadReachAngle) > 0) ||
+                    ((Math.cos(trueWindAngle - phi) - Math.cos(broadReachAngle) > 0) && (Math.abs(signedDistance) < maxDistanceFromLine))) {
+                // Broad reach mode (Downwind beating mode).
+                beatingMode = true;
+                targetCourse = trueWindAngle + tackDirection * broadReachAngle;
+            } else {
+                beatingMode = false;
+            }
+
+            targetCourse = limitRadianAngleRange(targetCourse);
+            targetCourse = targetCourse / Math.PI * 180;
+
+            return targetCourse;
+        }
     }
 
     /*Return distance in meters between two Gps points. Reused code from sailingrobot github*/
@@ -110,6 +188,11 @@ public class Calculations {
         return angle;
     }
 
+    private double limitRadianAngleRange(double angle) {
+        //TODO
+        return 0;
+    }
+
     /* Check if angle is between sectorAngle1 and sectorAngle2, going from 1 to 2 clockwise.
     * Reused code from sailingrobots. */
     private boolean isAngleInSector(double angle, double sectorAngle1, double sectorAngle2) {
@@ -122,5 +205,68 @@ public class Calculations {
             angleIsInSector = true;
         }
         return angleIsInSector;
+    }
+
+    /* Calculates mean of values. Reused code from sailingrobots. */
+    private float mean(Vector<Float> values) {
+        if (values.size() < 1) {
+            return 0;
+        }
+        float sum = 0;
+
+        Iterator iterator = values.iterator();
+        while(iterator.hasNext()) {
+            sum += (Float)iterator.next();
+        }
+
+        return sum / values.size();
+    }
+
+    /*
+     * uses formula for calculating mean of angles
+     * https://en.wikipedia.org/wiki/Mean_of_circular_quantities
+     * Reused code from sailingrobots.
+     */
+    private double meanOfAngles(Vector<Float> anglesInDegrees) {
+        if (anglesInDegrees.size() < 1) {
+            return 0;
+        }
+        Vector<Float> xx = new Vector<>();
+        Vector<Float> yy = new Vector<>();
+        float x, y;
+
+        // convert all angles to cartesian coordinates
+        Iterator iterator = anglesInDegrees.iterator();
+        while (iterator.hasNext()) {
+            float degrees = (Float)iterator.next();
+            x = (float)Math.cos(degrees * Math.PI / 180);
+            y = (float)Math.sin(degrees * Math.PI / 180);
+            xx.add(x);
+            yy.add(y);
+        }
+
+        // use formula
+        double meanAngleRadians = Math.atan2(mean(yy), mean(xx));
+        // atan2 produces results in the range (−π, π],
+        // which can be mapped to [0, 2π) by adding 2π to negative results
+        if (meanAngleRadians < 0) {
+            meanAngleRadians += 2*Math.PI;
+        }
+
+        return meanAngleRadians * 180 / Math.PI;
+    }
+
+    private double calculateSignedDistanceToLine() {
+        //TODO
+        return 0;
+    }
+
+    /* Reused code from sailingrobots. */
+    private int sgn(double value) {
+        if(value == 0) return 0;
+        if(value < 0) return -1;
+        if(value > 0) return 1;
+
+        return 0;
     }
 }
