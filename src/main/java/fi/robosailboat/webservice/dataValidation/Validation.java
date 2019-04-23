@@ -1,6 +1,7 @@
 package fi.robosailboat.webservice.dataValidation;
 
 import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
+import fi.robosailboat.webservice.calculation.Calculations;
 
 public class Validation {
 
@@ -19,7 +20,8 @@ public class Validation {
 
     public void validate(){
 
-        double distanceDiff = distanceBetween(latestData.getLatitude(), latestData.getLongitude(),
+        Calculations calculations = new Calculations();
+        double distanceDiff = calculations.distanceBetween(latestData.getLatitude(), latestData.getLongitude(),
                 expectedData.getLatitude(), expectedData.getLongitude());
 
         if(distanceDiff > maxDistanceDiff){

@@ -1,11 +1,57 @@
-package fi.robosailboat.webservice.dataValidation;
+package fi.robosailboat.webservice.calculation;
 
 public class Calculations {
+
+    private double prevWaypointLat;
+    private double prevWaypointLon;
+    private double nextWaypointLat;
+    private double nextWaypointLon;
+    private double vesselLat;
+    private double vesselLon;
+
+    public Calculations() {}
+
+    /* Calculates the angle of the line to be followed. Reused from sailingrobots. */
+    public double calculateAngleOfDesiredTrajectory() {
+        int earthRadius = 6371000; //meters
+
+        double prevWPCoord[] = {
+            earthRadius * Math.cos(prevWaypointLat * Math.PI / 180) * Math.cos(prevWaypointLon * Math.PI / 180),
+            earthRadius * Math.cos(prevWaypointLat * Math.PI / 180) * Math.sin(prevWaypointLon * Math.PI / 180),
+            earthRadius * Math.sin(prevWaypointLat * Math.PI / 180)
+        };
+
+        double nextWPCoord[] = {
+            earthRadius * Math.cos(nextWaypointLat * Math.PI / 180) * Math.cos(nextWaypointLon * Math.PI / 180),
+            earthRadius * Math.cos(nextWaypointLat * Math.PI / 180) * Math.sin(nextWaypointLon * Math.PI / 180),
+            earthRadius * Math.sin(nextWaypointLat * Math.PI / 180)
+        };
+
+        double m[][] = {
+            {-Math.sin(vesselLon * Math.PI / 180), Math.cos(vesselLon * Math.PI / 180), 0},
+            {
+                -Math.cos(vesselLon * Math.PI / 180) * Math.sin(vesselLat * Math.PI / 180),
+                -Math.sin(vesselLon * Math.PI / 180) * Math.sin(vesselLat * Math.PI / 180),
+                Math.cos(vesselLat * Math.PI / 180)
+            }
+        };
+
+        double bMinusA[] = {
+            nextWPCoord[0] - prevWPCoord[0],
+            nextWPCoord[1] - prevWPCoord[1],
+            nextWPCoord[2] - prevWPCoord[2]
+        };
+
+        double phi = Math.atan2(m[0][0] * bMinusA[0] + m[0][1] * bMinusA[1] + m[0][2] * bMinusA[2],
+                m[1][0] * bMinusA[0] + m[1][1] * bMinusA[1] + m[1][2] * bMinusA[2]);
+
+        return phi;
+    }
 
     /*Return distance in meters between two Gps points. Reused code from sailingrobot github*/
     public double distanceBetween(double lat1, double lon1, double lat2, double lon2){
 
-        final double radiusOfEarth = 6371.0;
+        final double radiusOfEarth = 6371.0; //km
 
         double deltaLatitudeRadians = Math.toRadians(lat2 - lat1);
         double lat1Radians = Math.toRadians(lat1);
@@ -17,7 +63,7 @@ public class Calculations {
                 * Math.sin(deltaLongitudeRadians/2);
 
         double b = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        double distance = radiusOfEarth * b * 1000;
+        double distance = radiusOfEarth * b * 1000; //meters
 
         return distance;
 
