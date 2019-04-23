@@ -72,6 +72,15 @@ public class Validation {
         return limitAngleRange(bearingToWaypoint);
     }
 
+    /* Calculates if the boat has to tack, which it needs if bearing to waypoint is close to true
+     * wind direction. Reused code from sailingrobots. */
+    public boolean calculateTack(double bearingToWaypoint, double trueWindDirection, double tackAngle) {
+        double minTackAngle = trueWindDirection - tackAngle;
+        double maxTackAngle = trueWindDirection + tackAngle;
+
+        return isAngleInSector(bearingToWaypoint, minTackAngle, maxTackAngle);
+    }
+
     /* Limits angle range. Reused code from sailingrobots. */
     private double limitAngleRange(double angle) {
         double fullRevolution = 360;
@@ -84,5 +93,19 @@ public class Validation {
             angle -= fullRevolution;
         }
         return angle;
+    }
+
+    /* Check if angle is between sectorAngle1 and sectorAngle2, going from 1 to 2 clockwise.
+    * Reused code from sailingrobots. */
+    private boolean isAngleInSector(double angle, double sectorAngle1, double sectorAngle2) {
+        double start = 0;
+        double end = limitAngleRange(sectorAngle2 - sectorAngle1);
+        double toCheck = limitAngleRange(angle - sectorAngle1);
+
+        boolean angleIsInSector = false;
+        if (toCheck >= start && toCheck <= end) {
+            angleIsInSector = true;
+        }
+        return angleIsInSector;
     }
 }
