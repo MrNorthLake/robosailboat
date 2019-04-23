@@ -33,7 +33,14 @@ public class Calculations {
     // Output variables
     private boolean beatingMode;
 
-    public Calculations() {}
+    public Calculations() {
+        incidenceAngle = 90 * Math.PI / 180;
+        maxDistanceFromLine = 20;
+
+        closeHauledAngle = 45 * Math.PI / 180;
+        broadReachAngle = 30 * Math.PI / 180;
+        tackingDistance = 15;
+    }
 
     /* Calculates the angle of the line to be followed. Reused from sailingrobots. */
     public double calculateAngleOfDesiredTrajectory() {
