@@ -53,4 +53,36 @@ public class Validation {
         return distance;
 
     }
+
+    /* Returns bearing to waypoint. Reused code from sailingrobots. */
+    public double bearingToWaypoint(double gpsLat, double gpsLon, double wpLat, double wpLon) {
+        //In radians
+        double boatLat = gpsLat * Math.PI / 180;
+        double waypointLat = wpLat * Math.PI / 180;
+        double deltaLon = (wpLon - gpsLon) * Math.PI / 180;
+
+        double y_coordinate = Math.sin(deltaLon) * Math.cos(waypointLat);
+        double x_coordinate = Math.cos(boatLat) * Math.sin(waypointLat)
+                - Math.sin(boatLat) * Math.cos(waypointLat) * Math.cos(deltaLon);
+
+        double bearingToWaypoint = Math.atan2(y_coordinate, x_coordinate);
+        //Degrees
+        bearingToWaypoint = bearingToWaypoint / Math.PI * 180;
+
+        return limitAngleRange(bearingToWaypoint);
+    }
+
+    /* Limits angle range. Reused code from sailingrobots. */
+    private double limitAngleRange(double angle) {
+        double fullRevolution = 360;
+        double minAngle = 0;
+
+        while(angle < minAngle) {
+            angle += fullRevolution;
+        }
+        while(angle >= (minAngle + fullRevolution)) {
+            angle -= fullRevolution;
+        }
+        return angle;
+    }
 }
