@@ -3,6 +3,7 @@ package fi.robosailboat.webservice.boatCommunication.controller;
 import fi.robosailboat.webservice.boatCommunication.dto.Command;
 import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
 import fi.robosailboat.webservice.robosailboatLib.repository.LoggingRepository;
+import fi.robosailboat.webservice.weatherStationCommunication.SimpleMqttCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
