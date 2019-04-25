@@ -31,7 +31,7 @@ public class Calculations {
     private float broadReachAngle; // radian
     private float tackingDistance; // meters
 
-    // State variable (inout variable)
+    // State variable (input variable)
     private int tackDirection; // [1] and [2]: tack variable (q).
 
     // Output variables
@@ -176,6 +176,7 @@ public class Calculations {
         }
     }
 
+    /* Returns true if the desired tack of the vessel is starboard. Reused code from sailingrobots. */
     public boolean getTargetTackStarboard(double targetCourse) {
 
         double meanTrueWindDirection = meanOfAngles(twdBuffer);
