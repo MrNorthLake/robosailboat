@@ -61,7 +61,7 @@ public class Calculations {
                 checkIfEnteredWaypoint();
                 double targetCourse = calculateTargetCourse();
                 if (targetCourse != DATA_OUT_OF_RANGE) {
-                    //boolean targetTackStarboard = getTargetTackStarboard(targetCourse);
+                    boolean targetTackStarboard = getTargetTackStarboard(targetCourse);
                     //figure out the commands
                 }
             }
@@ -174,6 +174,15 @@ public class Calculations {
             prevWaypointLon = vesselLon;
             prevWaypointLat = vesselLat;
         }
+    }
+
+    public boolean getTargetTackStarboard(double targetCourse) {
+
+        double meanTrueWindDirection = meanOfAngles(twdBuffer);
+        if (Math.sin((targetCourse - meanTrueWindDirection) * Math.PI / 180) < 0) {
+            return true;
+        }
+        return false;
     }
 
     /*Return distance in meters between two Gps points. Reused code from sailingrobot github*/
