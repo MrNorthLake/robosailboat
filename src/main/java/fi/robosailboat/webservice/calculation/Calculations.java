@@ -1,5 +1,7 @@
 package fi.robosailboat.webservice.calculation;
 
+import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
+
 import java.util.*;
 import java.util.Vector;
 
@@ -8,32 +10,39 @@ public class Calculations {
     private final int DATA_OUT_OF_RANGE = -2000;
     private double prevWaypointLat;
     private double prevWaypointLon;
-    private double prevWaypointRadius;
+    private double prevWaypointRadius; // m
     private double nextWaypointLat;
     private double nextWaypointLon;
-    private double nextWaypointRadius;
+    private double nextWaypointRadius; // m
     private double vesselLat;
     private double vesselLon;
-    private double trueWindSpeed;
-    private double trueWindDirection;
+    private double trueWindSpeed; // m/s
+    private double trueWindDirection; // degree [0, 360[ in North-East reference frame (clockwise)
     private Vector<Float> twdBuffer; // True wind direction buffer.
 
     // Vecteur field parameters
-    private float incidenceAngle;
-    private float maxDistanceFromLine;
+    private float incidenceAngle; // radian
+    private float maxDistanceFromLine; // meters
 
     // Beating sailing mode parameters
-    private float closeHauledAngle;
-    private float broadReachAngle;
-    private float tackingDistance;
+    private float closeHauledAngle; // radian
+    private float broadReachAngle; // radian
+    private float tackingDistance; // meters
 
     // State variable (inout variable)
-    private int tackDirection;
+    private int tackDirection; // [1] and [2]: tack variable (q).
 
     // Output variables
-    private boolean beatingMode;
+    private boolean beatingMode; // True if the vessel is in beating motion (zig-zag motion).
 
-    public Calculations() {
+    public Calculations(SensorData latestData) {
+
+        vesselLat = latestData.getLatitude();
+        vesselLon = latestData.getLongitude();
+
+        // Default values (from sailingrobots)
+        tackDirection = 1;
+        beatingMode = false;
         incidenceAngle = (float)(90 * Math.PI / 180);
         maxDistanceFromLine = 20;
 

@@ -20,7 +20,7 @@ public class Validation {
 
     public void validate(){
 
-        Calculations calculations = new Calculations();
+        Calculations calculations = new Calculations(latestData);
         double distanceDiff = calculations.distanceBetween(latestData.getLatitude(), latestData.getLongitude(),
                 expectedData.getLatitude(), expectedData.getLongitude());
 
