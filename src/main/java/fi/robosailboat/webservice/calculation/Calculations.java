@@ -58,7 +58,7 @@ public class Calculations {
         int sailCommand = 0;
         Runnable r = new Runnable() {
             public void run() {
-                //checkIfEnteredWaypoint();
+                checkIfEnteredWaypoint();
                 double targetCourse = calculateTargetCourse();
                 if (targetCourse != DATA_OUT_OF_RANGE) {
                     //boolean targetTackStarboard = getTargetTackStarboard(targetCourse);
@@ -161,6 +161,18 @@ public class Calculations {
             targetCourse = targetCourse / Math.PI * 180;
 
             return targetCourse;
+        }
+    }
+
+    /* If boat passed waypoint or enters it, set new line from boat to next waypoint. Reused code from sailingrobots. */
+    public void checkIfEnteredWaypoint() {
+        double distanceAfterWaypoint = calculateWaypointsOrthogonalLine(nextWaypointLat, nextWaypointLon, prevWaypointLat, prevWaypointLon,
+                vesselLat, vesselLon);
+        double distanceToWaypoint = distanceBetween(vesselLat, vesselLon, nextWaypointLat, nextWaypointLon);
+
+        if (distanceAfterWaypoint > 0 || distanceToWaypoint < nextWaypointRadius) {
+            prevWaypointLon = vesselLon;
+            prevWaypointLat = vesselLat;
         }
     }
 
@@ -344,6 +356,69 @@ public class Calculations {
         double signedDistance = boatCoord[0] * oab[0] + boatCoord[1] * oab[1] + boatCoord[2] * oab[2];
 
         return signedDistance;
+    }
+
+    /* Reused code from sailingrobots. */
+    private double calculateWaypointsOrthogonalLine(double nextLat, double nextLon, double prevLat, double prevLon,
+                                                   double gpsLat, double gpsLon) {
+        /* Check to see if boat has passed the orthogonal to the line
+         * otherwise the boat will continue to follow old line if it passed the waypoint without entering the radius
+         */
+        int earthRadius = 6371000;
+
+        //a
+        double prevWPCoord[] = {
+                earthRadius * Math.cos(prevLat * Math.PI / 180) * Math.cos(prevLon * Math.PI / 180),
+                earthRadius * Math.cos(prevLat * Math.PI / 180) * Math.sin(prevLon * Math.PI / 180),
+                earthRadius * Math.sin(prevLat * Math.PI / 180)
+        };
+        //b
+        double nextWPCoord[] = {
+                earthRadius * Math.cos(nextLat * Math.PI / 180) * Math.cos(nextLon * Math.PI / 180),
+                earthRadius * Math.cos(nextLat * Math.PI / 180) * Math.sin(nextLon * Math.PI / 180),
+                earthRadius * Math.sin(nextLat * Math.PI / 180)
+        };
+        //m
+        double boatCoord[] = {
+                earthRadius * Math.cos(gpsLat * Math.PI / 180) * Math.cos(gpsLon * Math.PI / 180),
+                earthRadius * Math.cos(gpsLat * Math.PI / 180) * Math.sin(gpsLon * Math.PI / 180),
+                earthRadius * Math.sin(gpsLat * Math.PI / 180)
+        };
+
+        //vector normal to plane
+        double oab[] = {
+                //Vector product: A^B divided by norm ||a^b||     a^b / ||a^b||
+                (prevWPCoord[1] * nextWPCoord[2] - prevWPCoord[2] * nextWPCoord[1]),
+                (prevWPCoord[2] * nextWPCoord[0] - prevWPCoord[0] * nextWPCoord[2]),
+                (prevWPCoord[0] * nextWPCoord[1] - prevWPCoord[1] * nextWPCoord[0])
+        };
+
+        double normOAB = Math.sqrt(Math.pow(oab[0],2) + Math.pow(oab[1],2) + Math.pow(oab[2],2));
+
+        oab[0] = oab[0] / normOAB;
+        oab[1] = oab[1] / normOAB;
+        oab[2] = oab[2] / normOAB;
+
+        //compute if boat is after waypointModel
+        //C the point such as  BC is orthogonal to AB
+        double orthogonalToABFromB[] = {
+                nextWPCoord[0] + oab[0],
+                nextWPCoord[1] + oab[1],
+                nextWPCoord[2] + oab[2]
+        };
+
+        //vector normal to plane
+        double obc[] = {
+                (orthogonalToABFromB[1] * nextWPCoord[2] - orthogonalToABFromB[2] * nextWPCoord[1]),
+                (orthogonalToABFromB[2] * nextWPCoord[0] - orthogonalToABFromB[0] * nextWPCoord[2]),
+                (orthogonalToABFromB[0] * nextWPCoord[1] - orthogonalToABFromB[1] * nextWPCoord[0])
+        };
+
+        double normOBC = Math.sqrt(Math.pow(obc[0],2) + Math.pow(obc[1],2) + Math.pow(obc[2],2));
+
+        double orthogonalLine = boatCoord[0] * obc[0]/normOBC + boatCoord[1] * obc[1]/normOBC + boatCoord[2] * obc[2]/normOBC;
+
+        return orthogonalLine;
     }
 
     /* Reused code from sailingrobots. */
