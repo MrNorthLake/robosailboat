@@ -1,7 +1,9 @@
 package fi.robosailboat.webservice.calculation;
 
+import fi.robosailboat.webservice.boatCommunication.dto.Command;
 import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
 
+import java.lang.*;
 import java.util.*;
 import java.util.Vector;
 
@@ -49,6 +51,25 @@ public class Calculations {
         closeHauledAngle = (float)(45 * Math.PI / 180);
         broadReachAngle = (float)(30 * Math.PI / 180);
         tackingDistance = 15;
+    }
+
+    public Command getNextCommand() {
+        int rudderCommand = 0;
+        int sailCommand = 0;
+        Runnable r = new Runnable() {
+            public void run() {
+                //checkIfEnteredWaypoint();
+                double targetCourse = calculateTargetCourse();
+                if (targetCourse != DATA_OUT_OF_RANGE) {
+                    //boolean targetTackStarboard = getTargetTackStarboard(targetCourse);
+                    //figure out the commands
+                }
+            }
+        };
+        Thread thread = new Thread(r);
+        thread.run(); //thread.start() or thread.run()
+
+        return new Command(rudderCommand, sailCommand);
     }
 
     /* Calculates the angle of the line to be followed. Reused from sailingrobots. */
