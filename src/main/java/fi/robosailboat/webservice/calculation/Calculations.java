@@ -1,5 +1,9 @@
 package fi.robosailboat.webservice.calculation;
 
+import fi.robosailboat.webservice.boatCommunication.dto.Command;
+import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
+
+import java.lang.*;
 import java.util.*;
 import java.util.Vector;
 
@@ -8,38 +12,64 @@ public class Calculations {
     private final int DATA_OUT_OF_RANGE = -2000;
     private double prevWaypointLat;
     private double prevWaypointLon;
-    private double prevWaypointRadius;
+    private double prevWaypointRadius; // m
     private double nextWaypointLat;
     private double nextWaypointLon;
-    private double nextWaypointRadius;
+    private double nextWaypointRadius; // m
     private double vesselLat;
     private double vesselLon;
-    private double trueWindSpeed;
-    private double trueWindDirection;
+    private double trueWindSpeed; // m/s
+    private double trueWindDirection; // degree [0, 360[ in North-East reference frame (clockwise)
     private Vector<Float> twdBuffer; // True wind direction buffer.
 
     // Vecteur field parameters
-    private float incidenceAngle;
-    private float maxDistanceFromLine;
+    private float incidenceAngle; // radian
+    private float maxDistanceFromLine; // meters
 
     // Beating sailing mode parameters
-    private float closeHauledAngle;
-    private float broadReachAngle;
-    private float tackingDistance;
+    private float closeHauledAngle; // radian
+    private float broadReachAngle; // radian
+    private float tackingDistance; // meters
 
-    // State variable (inout variable)
-    private int tackDirection;
+    // State variable (input variable)
+    private int tackDirection; // [1] and [2]: tack variable (q).
 
     // Output variables
-    private boolean beatingMode;
+    private boolean beatingMode; // True if the vessel is in beating motion (zig-zag motion).
 
-    public Calculations() {
+    public Calculations(SensorData latestData) {
+
+        vesselLat = latestData.getLatitude();
+        vesselLon = latestData.getLongitude();
+
+        // Default values (from sailingrobots)
+        tackDirection = 1;
+        beatingMode = false;
         incidenceAngle = (float)(90 * Math.PI / 180);
         maxDistanceFromLine = 20;
 
         closeHauledAngle = (float)(45 * Math.PI / 180);
         broadReachAngle = (float)(30 * Math.PI / 180);
         tackingDistance = 15;
+    }
+
+    public Command getNextCommand() {
+        int rudderCommand = 0;
+        int sailCommand = 0;
+        Runnable r = new Runnable() {
+            public void run() {
+                checkIfEnteredWaypoint();
+                double targetCourse = calculateTargetCourse();
+                if (targetCourse != DATA_OUT_OF_RANGE) {
+                    boolean targetTackStarboard = getTargetTackStarboard(targetCourse);
+                    //figure out the commands
+                }
+            }
+        };
+        Thread thread = new Thread(r);
+        thread.run(); //thread.start() or thread.run()
+
+        return new Command(rudderCommand, sailCommand);
     }
 
     /* Calculates the angle of the line to be followed. Reused from sailingrobots. */
@@ -132,6 +162,28 @@ public class Calculations {
 
             return targetCourse;
         }
+    }
+
+    /* If boat passed waypoint or enters it, set new line from boat to next waypoint. Reused code from sailingrobots. */
+    public void checkIfEnteredWaypoint() {
+        double distanceAfterWaypoint = calculateWaypointsOrthogonalLine(nextWaypointLat, nextWaypointLon, prevWaypointLat, prevWaypointLon,
+                vesselLat, vesselLon);
+        double distanceToWaypoint = distanceBetween(vesselLat, vesselLon, nextWaypointLat, nextWaypointLon);
+
+        if (distanceAfterWaypoint > 0 || distanceToWaypoint < nextWaypointRadius) {
+            prevWaypointLon = vesselLon;
+            prevWaypointLat = vesselLat;
+        }
+    }
+
+    /* Returns true if the desired tack of the vessel is starboard. Reused code from sailingrobots. */
+    public boolean getTargetTackStarboard(double targetCourse) {
+
+        double meanTrueWindDirection = meanOfAngles(twdBuffer);
+        if (Math.sin((targetCourse - meanTrueWindDirection) * Math.PI / 180) < 0) {
+            return true;
+        }
+        return false;
     }
 
     /*Return distance in meters between two Gps points. Reused code from sailingrobot github*/
@@ -314,6 +366,69 @@ public class Calculations {
         double signedDistance = boatCoord[0] * oab[0] + boatCoord[1] * oab[1] + boatCoord[2] * oab[2];
 
         return signedDistance;
+    }
+
+    /* Reused code from sailingrobots. */
+    private double calculateWaypointsOrthogonalLine(double nextLat, double nextLon, double prevLat, double prevLon,
+                                                   double gpsLat, double gpsLon) {
+        /* Check to see if boat has passed the orthogonal to the line
+         * otherwise the boat will continue to follow old line if it passed the waypoint without entering the radius
+         */
+        int earthRadius = 6371000;
+
+        //a
+        double prevWPCoord[] = {
+                earthRadius * Math.cos(prevLat * Math.PI / 180) * Math.cos(prevLon * Math.PI / 180),
+                earthRadius * Math.cos(prevLat * Math.PI / 180) * Math.sin(prevLon * Math.PI / 180),
+                earthRadius * Math.sin(prevLat * Math.PI / 180)
+        };
+        //b
+        double nextWPCoord[] = {
+                earthRadius * Math.cos(nextLat * Math.PI / 180) * Math.cos(nextLon * Math.PI / 180),
+                earthRadius * Math.cos(nextLat * Math.PI / 180) * Math.sin(nextLon * Math.PI / 180),
+                earthRadius * Math.sin(nextLat * Math.PI / 180)
+        };
+        //m
+        double boatCoord[] = {
+                earthRadius * Math.cos(gpsLat * Math.PI / 180) * Math.cos(gpsLon * Math.PI / 180),
+                earthRadius * Math.cos(gpsLat * Math.PI / 180) * Math.sin(gpsLon * Math.PI / 180),
+                earthRadius * Math.sin(gpsLat * Math.PI / 180)
+        };
+
+        //vector normal to plane
+        double oab[] = {
+                //Vector product: A^B divided by norm ||a^b||     a^b / ||a^b||
+                (prevWPCoord[1] * nextWPCoord[2] - prevWPCoord[2] * nextWPCoord[1]),
+                (prevWPCoord[2] * nextWPCoord[0] - prevWPCoord[0] * nextWPCoord[2]),
+                (prevWPCoord[0] * nextWPCoord[1] - prevWPCoord[1] * nextWPCoord[0])
+        };
+
+        double normOAB = Math.sqrt(Math.pow(oab[0],2) + Math.pow(oab[1],2) + Math.pow(oab[2],2));
+
+        oab[0] = oab[0] / normOAB;
+        oab[1] = oab[1] / normOAB;
+        oab[2] = oab[2] / normOAB;
+
+        //compute if boat is after waypointModel
+        //C the point such as  BC is orthogonal to AB
+        double orthogonalToABFromB[] = {
+                nextWPCoord[0] + oab[0],
+                nextWPCoord[1] + oab[1],
+                nextWPCoord[2] + oab[2]
+        };
+
+        //vector normal to plane
+        double obc[] = {
+                (orthogonalToABFromB[1] * nextWPCoord[2] - orthogonalToABFromB[2] * nextWPCoord[1]),
+                (orthogonalToABFromB[2] * nextWPCoord[0] - orthogonalToABFromB[0] * nextWPCoord[2]),
+                (orthogonalToABFromB[0] * nextWPCoord[1] - orthogonalToABFromB[1] * nextWPCoord[0])
+        };
+
+        double normOBC = Math.sqrt(Math.pow(obc[0],2) + Math.pow(obc[1],2) + Math.pow(obc[2],2));
+
+        double orthogonalLine = boatCoord[0] * obc[0]/normOBC + boatCoord[1] * obc[1]/normOBC + boatCoord[2] * obc[2]/normOBC;
+
+        return orthogonalLine;
     }
 
     /* Reused code from sailingrobots. */
