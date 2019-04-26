@@ -31,11 +31,14 @@ public class Calculations {
     private float broadReachAngle; // radian
     private float tackingDistance; // meters
 
-    // State variable (input variable)
+    // State variable (inout variable)
     private int tackDirection; // [1] and [2]: tack variable (q).
 
     // Output variables
     private boolean beatingMode; // True if the vessel is in beating motion (zig-zag motion).
+
+    private double rudderCommandAngle;
+    private double sailCommandAngle;
 
     public Calculations(SensorData latestData) {
 
@@ -54,8 +57,6 @@ public class Calculations {
     }
 
     public Command getNextCommand() {
-        int rudderCommand = 0;
-        int sailCommand = 0;
         Runnable r = new Runnable() {
             public void run() {
                 checkIfEnteredWaypoint();
@@ -69,7 +70,48 @@ public class Calculations {
         Thread thread = new Thread(r);
         thread.run(); //thread.start() or thread.run()
 
-        return new Command(rudderCommand, sailCommand);
+        return new Command(rudderCommandAngle, sailCommandAngle);
+    }
+
+    /* Calculates the command rudder angle according to the course difference. Reused code from sailingrobots. */
+    public double calculateRudderAngle() {
+        // degrees [0, 360[ in North-East reference frame (clockwise)
+        double desiredCourse = 0; // get desired course from db?
+        // degrees [0, 360[ in North-East reference frame (clockwise)
+        double vesselCourse = 0; // get current course...
+        // degrees
+        double maxRudderAngle = 0; // get from somewhere...
+
+        if (desiredCourse != DATA_OUT_OF_RANGE && vesselCourse != DATA_OUT_OF_RANGE) {
+            double differenceHeading = (vesselCourse - desiredCourse) * Math.PI / 180; //radians
+
+            // Wrong sense because over +/- 90°
+            if (Math.cos(differenceHeading) < 0) {
+                // Max Rudder angle in the opposite way
+                return sgn(Math.sin(differenceHeading)) * maxRudderAngle;
+            } else {
+                // Regulation of the rudder
+                return Math.sin(differenceHeading) * maxRudderAngle;
+            }
+        }
+        return -1.0; // "NO COMMAND"
+    }
+
+    /* Calculate the sail angle according to a linear relation to the apparent wind direction. Reused code from sailingrobots. */
+    public double calculateSailAngle() {
+        // get values...
+        // degrees
+        double maxSailAngle = 0;
+        // degrees
+        double minSailAngle = 0;
+        // degrees [0, 360[ in North-East reference frame (clockwise)
+        double apparentWindDirection = 0;
+
+        if (apparentWindDirection != DATA_OUT_OF_RANGE) {
+            // Equation from book "Robotic Sailing 2015", page 141
+            return (maxSailAngle - minSailAngle) * Math.abs(limitAngleRange180(apparentWindDirection)) / 180 + minSailAngle;
+        }
+        return -1.0; // "NO COMMAND"
     }
 
     /* Calculates the angle of the line to be followed. Reused from sailingrobots. */
@@ -263,6 +305,20 @@ public class Calculations {
         return angle;
     }
 
+    /* Limits angle range, min angle -180. Reused code from sailingrobots. */
+    private double limitAngleRange180(double angle) {
+        double fullRevolution = 360;
+        double minAngle = -180;
+
+        while(angle < minAngle) {
+            angle += fullRevolution;
+        }
+        while(angle >= (minAngle + fullRevolution)) {
+            angle -= fullRevolution;
+        }
+        return angle;
+    }
+
     /* Check if angle is between sectorAngle1 and sectorAngle2, going from 1 to 2 clockwise.
     * Reused code from sailingrobots. */
     private boolean isAngleInSector(double angle, double sectorAngle1, double sectorAngle2) {
@@ -431,7 +487,7 @@ public class Calculations {
         return orthogonalLine;
     }
 
-    /* Reused code from sailingrobots. */
+    /* The sign function. Reused code from sailingrobots. */
     private int sgn(double value) {
         if(value == 0) return 0;
         if(value < 0) return -1;

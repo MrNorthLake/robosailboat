@@ -5,11 +5,11 @@ import lombok.Data;
 @Data
 public class Command {
 
-    private int r; // rudder angle
-    private int s; // sail angle
+    private String r; // rudder angle
+    private String s; // sail angle
 
-    public Command(final int rudderAngle, final int sailAngle){
-        this.r = rudderAngle;
-        this.s = sailAngle;
+    public Command(final double rudderAngle, final double sailAngle){
+        this.r = String.format("%03d", rudderAngle);
+        this.s = String.format("%03d", sailAngle);
     }
 }
