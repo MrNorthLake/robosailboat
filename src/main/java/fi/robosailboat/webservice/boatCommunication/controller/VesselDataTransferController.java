@@ -19,7 +19,7 @@ public class VesselDataTransferController {
 
     @PostMapping(value = "/sensorData", consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public Command postData(@RequestBody SensorData values) {
+    public String postData(@RequestBody SensorData values) {
 
 
        /* this is just for testing*/
