@@ -30,7 +30,7 @@ public class VesselDataTransferController {
                 + " | Compass direction: " + latestData.getDirection());
 
 
-        return new Command(123, 321);
+        return new Command(1d, 10d);
     }
 
 }
