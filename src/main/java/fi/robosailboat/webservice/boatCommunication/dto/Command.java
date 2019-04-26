@@ -2,14 +2,18 @@ package fi.robosailboat.webservice.boatCommunication.dto;
 
 import lombok.Data;
 
+import static java.lang.String.format;
+
 @Data
 public class Command {
 
     private String r; // rudder angle
     private String s; // sail angle
 
-    public Command(final double rudderAngle, final double sailAngle){
-        this.r = String.format("%03d", rudderAngle);
-        this.s = String.format("%03d", sailAngle);
+    public Command(final Double rudderAngle, final Double sailAngle){
+        int a = rudderAngle.intValue();
+        int b = sailAngle.intValue();
+        this.r = format("%03d", a);
+        this.s = format("%03d", b);
     }
 }
