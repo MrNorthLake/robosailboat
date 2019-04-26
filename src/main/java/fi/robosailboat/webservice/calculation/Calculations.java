@@ -73,6 +73,7 @@ public class Calculations {
         return new Command(rudderCommandAngle, sailCommandAngle);
     }
 
+    /* Calculates the command rudder angle according to the course difference. Reused code from sailingrobots. */
     public double calculateRudderAngle() {
         // degrees [0, 360[ in North-East reference frame (clockwise)
         double desiredCourse = 0; // get desired course from db?
@@ -92,6 +93,23 @@ public class Calculations {
                 // Regulation of the rudder
                 return Math.sin(differenceHeading) * maxRudderAngle;
             }
+        }
+        return -1.0; // "NO COMMAND"
+    }
+
+    /* Calculate the sail angle according to a linear relation to the apparent wind direction. Reused code from sailingrobots. */
+    public double calculateSailAngle() {
+        // get values...
+        // degrees
+        double maxSailAngle = 0;
+        // degrees
+        double minSailAngle = 0;
+        // degrees [0, 360[ in North-East reference frame (clockwise)
+        double apparentWindDirection = 0;
+
+        if (apparentWindDirection != DATA_OUT_OF_RANGE) {
+            // Equation from book "Robotic Sailing 2015", page 141
+            return (maxSailAngle - minSailAngle) * Math.abs(limitAngleRange180(apparentWindDirection)) / 180 + minSailAngle;
         }
         return -1.0; // "NO COMMAND"
     }
@@ -284,6 +302,20 @@ public class Calculations {
             angle -= fullRevolution;
         }
 
+        return angle;
+    }
+
+    /* Limits angle range, min angle -180. Reused code from sailingrobots. */
+    private double limitAngleRange180(double angle) {
+        double fullRevolution = 360;
+        double minAngle = -180;
+
+        while(angle < minAngle) {
+            angle += fullRevolution;
+        }
+        while(angle >= (minAngle + fullRevolution)) {
+            angle -= fullRevolution;
+        }
         return angle;
     }
 
