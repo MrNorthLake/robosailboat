@@ -54,7 +54,7 @@ public class Calculations {
     private double sailCommandAngle;
 
     public Calculations(SensorData latestData) {
-
+        init();
         vesselLat = latestData.getLatitude();
         vesselLon = latestData.getLongitude();
         vesselHeading = latestData.getCompassHeading();
@@ -68,6 +68,22 @@ public class Calculations {
         closeHauledAngle = (float)(45 * Math.PI / 180);
         broadReachAngle = (float)(30 * Math.PI / 180);
         tackingDistance = 15;
+    }
+
+    public void init() {
+        desiredHeading = DATA_OUT_OF_RANGE;
+        vesselHeading = DATA_OUT_OF_RANGE;
+        vesselLat = DATA_OUT_OF_RANGE;
+        vesselLon = DATA_OUT_OF_RANGE;
+        prevWaypointLat = DATA_OUT_OF_RANGE;
+        prevWaypointLon = DATA_OUT_OF_RANGE;
+        prevWaypointRadius = DATA_OUT_OF_RANGE;
+        nextWaypointLat = DATA_OUT_OF_RANGE;
+        nextWaypointLon = DATA_OUT_OF_RANGE;
+        nextWaypointRadius = DATA_OUT_OF_RANGE;
+        trueWindSpeed = DATA_OUT_OF_RANGE;
+        trueWindDirection = DATA_OUT_OF_RANGE;
+        apparentWindDirection = DATA_OUT_OF_RANGE;
     }
 
     public Command getNextCommand() {
