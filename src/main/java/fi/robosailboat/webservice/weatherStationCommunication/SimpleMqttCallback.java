@@ -6,8 +6,8 @@ import org.eclipse.paho.client.mqttv3.*;
 @Slf4j
 public class SimpleMqttCallback implements MqttCallback {
 
-    private static final String CONNECTION_URL = "tcp://192.168.1.102:1883";
-    private static final String SUBSCRIPTION = "Area1/#";
+    private static final String CONNECTION_URL = "tcp://m24.cloudmqtt.com:14846";
+    private static final String SUBSCRIPTION = "wind_data";
     private MqttClient client;
     private static double windDirection;
 
@@ -16,6 +16,7 @@ public class SimpleMqttCallback implements MqttCallback {
             this.client = new MqttClient(CONNECTION_URL, MqttClient.generateClientId());
             this.client.setCallback(this);
             this.client.subscribe(SUBSCRIPTION);
+            this.client.connect();
         } catch (MqttException e) {
             log.error("Mqtt error: " + e);
         }
