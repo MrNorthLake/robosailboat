@@ -71,18 +71,14 @@ public class Calculations {
     }
 
     public Command getNextCommand() {
-        Runnable r = new Runnable() {
-            public void run() {
-                checkIfEnteredWaypoint();
-                double targetCourse = calculateTargetCourse();
-                if (targetCourse != DATA_OUT_OF_RANGE) {
-                    boolean targetTackStarboard = getTargetTackStarboard(targetCourse);
-                    //figure out the commands
-                }
-            }
-        };
-        Thread thread = new Thread(r);
-        thread.run(); //thread.start() or thread.run()
+        checkIfEnteredWaypoint();
+        double targetCourse = calculateTargetCourse();
+        if (targetCourse != DATA_OUT_OF_RANGE) {
+            boolean targetTackStarboard = getTargetTackStarboard(targetCourse);
+            //figure out the commands
+            rudderCommandAngle = calculateRudderAngle();
+            sailCommandAngle = calculateSailAngle();
+        }
 
         return new Command(rudderCommandAngle, sailCommandAngle);
     }
