@@ -9,7 +9,20 @@ import java.util.Vector;
 
 public class Calculations {
 
+    // Constants
     private final int DATA_OUT_OF_RANGE = -2000;
+    private final int NO_COMMAND = -1000;
+
+    // For rudder angle calculation
+    private double desiredCourse; // degrees [0, 360[ in North-East reference frame (clockwise)
+    private double vesselCourse; // degrees [0, 360[ in North-East reference frame (clockwise)
+    private double maxRudderAngle; // degrees
+
+    // For sail angle calculation
+    private double maxSailAngle; // degrees
+    private double minSailAngle; // degrees
+    private double apparentWindDirection; // degrees [0, 360[ in North-East reference frame (clockwise)
+
     private double prevWaypointLat;
     private double prevWaypointLon;
     private double prevWaypointRadius; // m
@@ -75,13 +88,6 @@ public class Calculations {
 
     /* Calculates the command rudder angle according to the course difference. Reused code from sailingrobots. */
     public double calculateRudderAngle() {
-        // degrees [0, 360[ in North-East reference frame (clockwise)
-        double desiredCourse = 0; // get desired course from db?
-        // degrees [0, 360[ in North-East reference frame (clockwise)
-        double vesselCourse = 0; // get current course...
-        // degrees
-        double maxRudderAngle = 0; // get from somewhere...
-
         if (desiredCourse != DATA_OUT_OF_RANGE && vesselCourse != DATA_OUT_OF_RANGE) {
             double differenceHeading = (vesselCourse - desiredCourse) * Math.PI / 180; //radians
 
@@ -94,24 +100,16 @@ public class Calculations {
                 return Math.sin(differenceHeading) * maxRudderAngle;
             }
         }
-        return -1.0; // "NO COMMAND"
+        return NO_COMMAND;
     }
 
     /* Calculate the sail angle according to a linear relation to the apparent wind direction. Reused code from sailingrobots. */
     public double calculateSailAngle() {
-        // get values...
-        // degrees
-        double maxSailAngle = 0;
-        // degrees
-        double minSailAngle = 0;
-        // degrees [0, 360[ in North-East reference frame (clockwise)
-        double apparentWindDirection = 0;
-
         if (apparentWindDirection != DATA_OUT_OF_RANGE) {
             // Equation from book "Robotic Sailing 2015", page 141
             return (maxSailAngle - minSailAngle) * Math.abs(limitAngleRange180(apparentWindDirection)) / 180 + minSailAngle;
         }
-        return -1.0; // "NO COMMAND"
+        return NO_COMMAND;
     }
 
     /* Calculates the angle of the line to be followed. Reused from sailingrobots. */
