@@ -113,6 +113,38 @@ public class Calculations {
         return NO_COMMAND;
     }
 
+    public double calculateTrueWindSpeed(int windsensorDir, int windsensorSpeed, double gpsSpeed, double heading) {
+        if (windsensorSpeed < 0.001) {
+            return gpsSpeed;
+        }
+
+        double apparentWindAngle = windsensorDir * Math.PI / 180;
+
+        if (apparentWindAngle < 0.001) {
+            apparentWindAngle = 0.001;
+        } else if (apparentWindAngle > 359.99) {
+            apparentWindAngle = 359.99;
+        }
+
+        double u = gpsSpeed * Math.sin(heading) - windsensorSpeed * Math.sin(apparentWindAngle);
+        double v = gpsSpeed * Math.cos(heading) - windsensorSpeed * Math.cos(apparentWindAngle);
+
+        return Math.atan(u/v);
+    }
+
+    public void calculateApparentWind(int windsensorDir, int windsensorSpeed, double gpsSpeed, double heading,
+	           double trueWindDirection) {
+        double trueWindSpeed = calculateTrueWindSpeed(windsensorDir, windsensorSpeed, gpsSpeed, heading);
+
+        double wcaw[] = {
+                trueWindSpeed * Math.cos((trueWindDirection+Math.PI) - heading) - gpsSpeed,
+                trueWindSpeed * Math.sin((trueWindDirection+Math.PI) - heading)
+        };
+
+        //apparentWindSpeed = Math.sqrt(Math.pow(wcaw[0], 2) + Math.pow(wcaw[1], 2));
+        apparentWindDirection = -Math.atan2(wcaw[0], wcaw[1]) * 180 / Math.PI;
+    }
+
     /* Calculates the angle of the line to be followed. Reused from sailingrobots. */
     public double calculateAngleOfDesiredTrajectory() {
         int earthRadius = 6371000; //meters
