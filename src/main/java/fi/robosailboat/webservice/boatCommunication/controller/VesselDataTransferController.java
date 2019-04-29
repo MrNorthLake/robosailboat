@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Random;
+
 @RestController
 @RequestMapping("/dataTransfer")
 public class VesselDataTransferController {
@@ -29,8 +31,12 @@ public class VesselDataTransferController {
         LOG.info("Latest sensorData. Gps latitud: " + latestData.getLatitude() + " | Gps longitud: " + latestData.getLongitude()
                 + " | Compass direction: " + latestData.getDirection());
 
+        /*Random respons command with values between 60 and 120*/
+        Random rnd = new Random();
+        int rAngle = rnd.nextInt(61)+60;
+        int sAngle = rnd.nextInt(61)+60;
 
-        return new Command(1d, 10d);
+        return  new Command((double)rAngle, (double)sAngle);
     }
 
 }
