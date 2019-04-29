@@ -14,8 +14,8 @@ public class Calculations {
     private final int NO_COMMAND = -1000;
 
     // For rudder angle calculation
-    private double desiredCourse; // degrees [0, 360[ in North-East reference frame (clockwise)
-    private double vesselCourse; // degrees [0, 360[ in North-East reference frame (clockwise)
+    private double desiredHeading; // degrees [0, 360[ in North-East reference frame (clockwise)
+    private double vesselHeading; // degrees [0, 360[ in North-East reference frame (clockwise)
     private double maxRudderAngle; // degrees
 
     // For sail angle calculation
@@ -57,6 +57,7 @@ public class Calculations {
 
         vesselLat = latestData.getLatitude();
         vesselLon = latestData.getLongitude();
+        vesselHeading = latestData.getCompassHeading();
 
         // Default values (from sailingrobots)
         tackDirection = 1;
@@ -88,8 +89,8 @@ public class Calculations {
 
     /* Calculates the command rudder angle according to the course difference. Reused code from sailingrobots. */
     public double calculateRudderAngle() {
-        if (desiredCourse != DATA_OUT_OF_RANGE && vesselCourse != DATA_OUT_OF_RANGE) {
-            double differenceHeading = (vesselCourse - desiredCourse) * Math.PI / 180; //radians
+        if (desiredHeading != DATA_OUT_OF_RANGE && vesselHeading != DATA_OUT_OF_RANGE) {
+            double differenceHeading = (vesselHeading - desiredHeading) * Math.PI / 180; //radians
 
             // Wrong sense because over +/- 90°
             if (Math.cos(differenceHeading) < 0) {
