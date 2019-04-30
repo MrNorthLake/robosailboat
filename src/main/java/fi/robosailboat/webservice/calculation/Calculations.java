@@ -107,9 +107,11 @@ public class Calculations {
         checkIfEnteredWaypoint();
         desiredHeading = calculateTargetCourse();
         if (desiredHeading != DATA_OUT_OF_RANGE) {
-            boolean targetTackStarboard = getTargetTackStarboard(targetCourse);
+            boolean targetTackStarboard = getTargetTackStarboard(desiredHeading);
             //figure out the commands
             rudderCommandAngle = calculateRudderAngle();
+            // +90 degrees for converting to Arduino
+            rudderCommandAngle += 90;
             sailCommandAngle = calculateSailAngle();
         }
 
