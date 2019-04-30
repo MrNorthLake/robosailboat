@@ -40,7 +40,8 @@ public class Calculations {
     private double vesselLon;
     private double trueWindSpeed; // m/s
     private double trueWindDirection; // degree [0, 360[ in North-East reference frame (clockwise)
-    private Vector<Float> twdBuffer; // True wind direction buffer.
+    private Vector<Double> twdBuffer; // True wind direction buffer.
+    private int twdBufferMaxSize = 200;
 
     // Vecteur field parameters
     private float incidenceAngle; // radian
@@ -94,6 +95,7 @@ public class Calculations {
         trueWindSpeed = DATA_OUT_OF_RANGE;
         trueWindDirection = DATA_OUT_OF_RANGE;
         apparentWindDirection = DATA_OUT_OF_RANGE;
+        twdBuffer = new Vector<>();
     }
 
     /* Must set values for all calculations to work. */
@@ -116,6 +118,9 @@ public class Calculations {
 
         trueWindDirection = calculateTrueWindDirection(windDir, windSpeed, gpsSpeed, vesselHeading);
         trueWindSpeed = calculateTrueWindSpeed(windDir, windSpeed, gpsSpeed, vesselHeading);
+
+        addValueToTwdBuffer(trueWindDirection);
+
         calculateApparentWind(windDir, windSpeed, gpsSpeed, vesselHeading);
     }
 
@@ -436,15 +441,15 @@ public class Calculations {
     }
 
     /* Calculates mean of values. Reused code from sailingrobots. */
-    private float mean(Vector<Float> values) {
+    private double mean(Vector<Double> values) {
         if (values.size() < 1) {
             return 0;
         }
-        float sum = 0;
+        double sum = 0;
 
         Iterator iterator = values.iterator();
         while(iterator.hasNext()) {
-            sum += (Float)iterator.next();
+            sum += (Double)iterator.next();
         }
 
         return sum / values.size();
@@ -455,20 +460,20 @@ public class Calculations {
      * https://en.wikipedia.org/wiki/Mean_of_circular_quantities
      * Reused code from sailingrobots.
      */
-    private double meanOfAngles(Vector<Float> anglesInDegrees) {
+    private double meanOfAngles(Vector<Double> anglesInDegrees) {
         if (anglesInDegrees.size() < 1) {
             return 0;
         }
-        Vector<Float> xx = new Vector<>();
-        Vector<Float> yy = new Vector<>();
-        float x, y;
+        Vector<Double> xx = new Vector<>();
+        Vector<Double> yy = new Vector<>();
+        double x, y;
 
         // convert all angles to cartesian coordinates
         Iterator iterator = anglesInDegrees.iterator();
         while (iterator.hasNext()) {
-            float degrees = (Float)iterator.next();
-            x = (float)Math.cos(degrees * Math.PI / 180);
-            y = (float)Math.sin(degrees * Math.PI / 180);
+            double degrees = (Double)iterator.next();
+            x = Math.cos(degrees * Math.PI / 180);
+            y = Math.sin(degrees * Math.PI / 180);
             xx.add(x);
             yy.add(y);
         }
@@ -482,6 +487,15 @@ public class Calculations {
         }
 
         return meanAngleRadians * 180 / Math.PI;
+    }
+
+    /* Add values to twdBuffer. Reused code from sailingrobots. */
+    private void addValueToTwdBuffer(double value) {
+        twdBuffer.add(value);
+
+        if (twdBuffer.size() > twdBufferMaxSize) {
+            twdBuffer.removeElementAt(0);
+        }
     }
 
     /* Calculates signed distance to line. Reused code from sailingrobots. */
