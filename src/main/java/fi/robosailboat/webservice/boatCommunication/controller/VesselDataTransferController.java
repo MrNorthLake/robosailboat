@@ -30,6 +30,7 @@ public class VesselDataTransferController {
                 + " | Compass direction: " + latestData.getDirection());
 
 
+        // +90 degrees for converting to Arduino
         return new Command(1d, 10d);
     }
 
