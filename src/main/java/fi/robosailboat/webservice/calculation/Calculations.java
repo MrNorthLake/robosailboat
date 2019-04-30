@@ -5,11 +5,16 @@ import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
 import fi.robosailboat.webservice.boatCommunication.dto.WaypointData;
 import fi.robosailboat.webservice.boatCommunication.dto.WindData;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.*;
 import java.util.*;
 import java.util.Vector;
 
 public class Calculations {
+
+    private static Logger LOG = LoggerFactory.getLogger(Calculations.class);
 
     // Constants
     private final int DATA_OUT_OF_RANGE = -2000;
