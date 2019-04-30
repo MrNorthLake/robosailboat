@@ -52,14 +52,29 @@ public class Calculations {
     // Output variables
     private boolean beatingMode; // True if the vessel is in beating motion (zig-zag motion).
 
-    private double rudderCommandAngle;
-    private double sailCommandAngle;
+    private double rudderCommandAngle; // degrees [-30, +30[ in vessel reference frame (clockwise from top view)
+    private double sailCommandAngle; // degrees
 
     public Calculations(SensorData sensorData, WaypointData waypointData, WindData windData) {
         init();
         vesselLat = sensorData.getLatitude();
         vesselLon = sensorData.getLongitude();
         vesselHeading = sensorData.getCompassHeading();
+
+        nextWaypointLat = waypointData.getNextLatitude();
+        nextWaypointLon = waypointData.getNextLongitude();
+        nextWaypointRadius = waypointData.getNextRadius();
+        prevWaypointLat = waypointData.getPrevLatitude();
+        prevWaypointLon = waypointData.getPrevLongitude();
+        prevWaypointRadius = waypointData.getPrevRadius();
+
+        trueWindDirection = windData.getWindDirection();
+        trueWindSpeed = windData.getWindSpeed();
+
+        // Max and min angles
+        maxRudderAngle = 30;
+        maxSailAngle = 120; //??
+        minSailAngle = 60; //??
 
         // Default values (from sailingrobots)
         tackDirection = 1;
@@ -90,8 +105,8 @@ public class Calculations {
 
     public Command getNextCommand() {
         checkIfEnteredWaypoint();
-        double targetCourse = calculateTargetCourse();
-        if (targetCourse != DATA_OUT_OF_RANGE) {
+        desiredHeading = calculateTargetCourse();
+        if (desiredHeading != DATA_OUT_OF_RANGE) {
             boolean targetTackStarboard = getTargetTackStarboard(targetCourse);
             //figure out the commands
             rudderCommandAngle = calculateRudderAngle();
