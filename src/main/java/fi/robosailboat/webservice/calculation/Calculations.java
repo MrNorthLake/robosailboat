@@ -112,13 +112,14 @@ public class Calculations {
         checkIfEnteredWaypoint();
         desiredHeading = calculateTargetCourse();
         if (desiredHeading != DATA_OUT_OF_RANGE) {
+            // True if the desired tack of the vessel is starboard.
             boolean targetTackStarboard = getTargetTackStarboard(desiredHeading);
-            //figure out the commands
-            rudderCommandAngle = calculateRudderAngle();
-            // +90 degrees for converting to Arduino
-            rudderCommandAngle += 90;
-            sailCommandAngle = calculateSailAngle();
         }
+        //figure out the commands
+        rudderCommandAngle = calculateRudderAngle();
+        // +90 degrees for converting to Arduino
+        rudderCommandAngle += 90;
+        sailCommandAngle = calculateSailAngle();
 
         return new Command(rudderCommandAngle, sailCommandAngle);
     }
