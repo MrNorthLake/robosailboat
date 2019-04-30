@@ -61,27 +61,8 @@ public class Calculations {
     private double rudderCommandAngle; // degrees [-30, +30[ in vessel reference frame (clockwise from top view)
     private double sailCommandAngle; // degrees
 
-    public Calculations(SensorData sensorData, WaypointData waypointData, WindData windData) {
+    public Calculations() {
         init();
-        vesselLat = sensorData.getLatitude();
-        vesselLon = sensorData.getLongitude();
-        vesselHeading = sensorData.getCompassHeading();
-
-        double gpsSpeed = 1; // get from GPS
-
-        nextWaypointLat = waypointData.getNextLatitude();
-        nextWaypointLon = waypointData.getNextLongitude();
-        nextWaypointRadius = waypointData.getNextRadius();
-        prevWaypointLat = waypointData.getPrevLatitude();
-        prevWaypointLon = waypointData.getPrevLongitude();
-        prevWaypointRadius = waypointData.getPrevRadius();
-
-        double windDir = windData.getWindDirection();
-        double windSpeed = windData.getWindSpeed();
-
-        trueWindDirection = calculateTrueWindDirection(windDir, windSpeed, gpsSpeed, vesselHeading);
-        trueWindSpeed = calculateTrueWindSpeed(windDir, windSpeed, gpsSpeed, vesselHeading);
-        calculateApparentWind(windDir, windSpeed, gpsSpeed, vesselHeading);
 
         // Max and min angles
         maxRudderAngle = 30;
@@ -113,6 +94,29 @@ public class Calculations {
         trueWindSpeed = DATA_OUT_OF_RANGE;
         trueWindDirection = DATA_OUT_OF_RANGE;
         apparentWindDirection = DATA_OUT_OF_RANGE;
+    }
+
+    /* Must set values for all calculations to work. */
+    public void setData(SensorData sensorData, WaypointData waypointData, WindData windData) {
+        vesselLat = sensorData.getLatitude();
+        vesselLon = sensorData.getLongitude();
+        vesselHeading = sensorData.getCompassHeading();
+
+        double gpsSpeed = 1; // get from GPS
+
+        nextWaypointLat = waypointData.getNextLatitude();
+        nextWaypointLon = waypointData.getNextLongitude();
+        nextWaypointRadius = waypointData.getNextRadius();
+        prevWaypointLat = waypointData.getPrevLatitude();
+        prevWaypointLon = waypointData.getPrevLongitude();
+        prevWaypointRadius = waypointData.getPrevRadius();
+
+        double windDir = windData.getWindDirection();
+        double windSpeed = windData.getWindSpeed();
+
+        trueWindDirection = calculateTrueWindDirection(windDir, windSpeed, gpsSpeed, vesselHeading);
+        trueWindSpeed = calculateTrueWindSpeed(windDir, windSpeed, gpsSpeed, vesselHeading);
+        calculateApparentWind(windDir, windSpeed, gpsSpeed, vesselHeading);
     }
 
     public Command getNextCommand() {

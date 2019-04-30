@@ -24,7 +24,8 @@ public class Validation {
 
     public void validate(){
 
-        Calculations calculations = new Calculations(latestData, waypointData, windData);
+        Calculations calculations = new Calculations();
+        calculations.setData(latestData, waypointData, windData);
         double distanceDiff = calculations.distanceBetween(latestData.getLatitude(), latestData.getLongitude(),
                 expectedData.getLatitude(), expectedData.getLongitude());
 

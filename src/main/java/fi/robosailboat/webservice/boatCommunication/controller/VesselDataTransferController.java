@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class VesselDataTransferController {
 
     private static Logger LOG = LoggerFactory.getLogger(VesselDataTransferController.class);
+    private Calculations calculations = new Calculations();
 
     @Autowired
     private LoggingRepository loggingRepo;
@@ -38,7 +39,7 @@ public class VesselDataTransferController {
         // Direction: from north, speed: 5 m/s
         WindData windData = new WindData(0, 5);
 
-        Calculations calculations = new Calculations(latestData, waypointData, windData);
+        calculations.setData(latestData, waypointData, windData);
 
         return calculations.getNextCommand();
     }

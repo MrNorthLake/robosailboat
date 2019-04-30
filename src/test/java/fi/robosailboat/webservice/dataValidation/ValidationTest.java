@@ -21,7 +21,8 @@ public class ValidationTest {
         SensorData two = new SensorData(60.098792, 19.947658, 0, 0, 0, 0);
         WaypointData waypointData = new WaypointData("", 0, 0, 0, 0, 0, 0);
         WindData windData = new WindData(0, 0);
-        Calculations calculations = new Calculations(one, waypointData, windData);
+        Calculations calculations = new Calculations();
+        calculations.setData(one, waypointData, windData);
 
         double result = calculations.distanceBetween(60.105381, 19.944503,
                 60.098792, 19.947658);
