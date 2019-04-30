@@ -15,4 +15,14 @@ public class WaypointData {
     private double prevLatitude;
     private double prevLongitude;
     private int prevRadius;
+
+    public WaypointData(String id, double nextLatitude, double nextLongitude, int nextRadius, double prevLatitude, double prevLongitude, int prevRadius) {
+        this.id = id;
+        this.nextLatitude = nextLatitude;
+        this.nextLongitude = nextLongitude;
+        this.nextRadius = nextRadius;
+        this.prevLatitude = prevLatitude;
+        this.prevLongitude = prevLongitude;
+        this.prevRadius = prevRadius;
+    }
 }

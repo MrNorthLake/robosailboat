@@ -2,6 +2,8 @@ package fi.robosailboat.webservice.calculation;
 
 import fi.robosailboat.webservice.boatCommunication.dto.Command;
 import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
+import fi.robosailboat.webservice.boatCommunication.dto.WaypointData;
+import fi.robosailboat.webservice.boatCommunication.dto.WindData;
 
 import java.lang.*;
 import java.util.*;
@@ -53,11 +55,11 @@ public class Calculations {
     private double rudderCommandAngle;
     private double sailCommandAngle;
 
-    public Calculations(SensorData latestData) {
+    public Calculations(SensorData sensorData, WaypointData waypointData, WindData windData) {
         init();
-        vesselLat = latestData.getLatitude();
-        vesselLon = latestData.getLongitude();
-        vesselHeading = latestData.getCompassHeading();
+        vesselLat = sensorData.getLatitude();
+        vesselLon = sensorData.getLongitude();
+        vesselHeading = sensorData.getCompassHeading();
 
         // Default values (from sailingrobots)
         tackDirection = 1;

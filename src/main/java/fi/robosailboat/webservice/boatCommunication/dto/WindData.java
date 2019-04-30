@@ -8,4 +8,9 @@ public class WindData {
 
     private double windDirection;
     private double windSpeed;
+
+    public WindData(double windDirection, double windSpeed) {
+        this.windDirection = windDirection;
+        this.windSpeed = windSpeed;
+    }
 }
