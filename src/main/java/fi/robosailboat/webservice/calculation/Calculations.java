@@ -66,6 +66,8 @@ public class Calculations {
         vesselLon = sensorData.getLongitude();
         vesselHeading = sensorData.getCompassHeading();
 
+        double gpsSpeed = 1; // get from GPS
+
         nextWaypointLat = waypointData.getNextLatitude();
         nextWaypointLon = waypointData.getNextLongitude();
         nextWaypointRadius = waypointData.getNextRadius();
@@ -73,8 +75,12 @@ public class Calculations {
         prevWaypointLon = waypointData.getPrevLongitude();
         prevWaypointRadius = waypointData.getPrevRadius();
 
-        trueWindDirection = windData.getWindDirection();
-        trueWindSpeed = windData.getWindSpeed();
+        double windDir = windData.getWindDirection();
+        double windSpeed = windData.getWindSpeed();
+
+        trueWindDirection = calculateTrueWindDirection(windDir, windSpeed, gpsSpeed, vesselHeading);
+        trueWindSpeed = calculateTrueWindSpeed(windDir, windSpeed, gpsSpeed, vesselHeading);
+        calculateApparentWind(windDir, windSpeed, gpsSpeed, vesselHeading);
 
         // Max and min angles
         maxRudderAngle = 30;
@@ -150,7 +156,33 @@ public class Calculations {
         return NO_COMMAND;
     }
 
-    public double calculateTrueWindSpeed(int windsensorDir, int windsensorSpeed, double gpsSpeed, double heading) {
+    public double calculateTrueWindDirection(double windsensorDir, double windsensorSpeed, double gpsSpeed, double heading) {
+        if (windsensorSpeed < 0.001) {
+            return heading;
+        }
+
+        if (windsensorDir < 0.001) {
+            windsensorDir = 0.001;
+        } else if (windsensorDir > 359.999) {
+            windsensorDir = 359.999;
+        }
+
+        double trueWindSpeed = Math.sqrt((windsensorSpeed*windsensorSpeed) + (gpsSpeed*gpsSpeed) -
+                (2 * gpsSpeed * windsensorSpeed * Math.cos(windsensorDir / 180 * Math.PI)));
+
+        double alpha = Math.acos((windsensorSpeed * Math.cos(windsensorDir / 180 * Math.PI) - gpsSpeed) / trueWindSpeed)
+                * 180 / Math.PI;
+
+        double twd = 0;
+        if (windsensorDir > 180) {
+            twd = limitAngleRange(heading - alpha);
+        } else {
+            twd = limitAngleRange(heading + alpha);
+        }
+        return twd;
+    }
+
+    public double calculateTrueWindSpeed(double windsensorDir, double windsensorSpeed, double gpsSpeed, double heading) {
         if (windsensorSpeed < 0.001) {
             return gpsSpeed;
         }
@@ -159,8 +191,8 @@ public class Calculations {
 
         if (apparentWindAngle < 0.001) {
             apparentWindAngle = 0.001;
-        } else if (apparentWindAngle > 359.99) {
-            apparentWindAngle = 359.99;
+        } else if (apparentWindAngle > 359.999) {
+            apparentWindAngle = 359.999;
         }
 
         double u = gpsSpeed * Math.sin(heading) - windsensorSpeed * Math.sin(apparentWindAngle);
@@ -169,10 +201,7 @@ public class Calculations {
         return Math.atan(u/v);
     }
 
-    public void calculateApparentWind(int windsensorDir, int windsensorSpeed, double gpsSpeed, double heading,
-	           double trueWindDirection) {
-        double trueWindSpeed = calculateTrueWindSpeed(windsensorDir, windsensorSpeed, gpsSpeed, heading);
-
+    public void calculateApparentWind(double windsensorDir, double windsensorSpeed, double gpsSpeed, double heading) {
         double wcaw[] = {
                 trueWindSpeed * Math.cos((trueWindDirection+Math.PI) - heading) - gpsSpeed,
                 trueWindSpeed * Math.sin((trueWindDirection+Math.PI) - heading)
