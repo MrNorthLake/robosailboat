@@ -35,7 +35,7 @@ public class VesselDataTransferController {
         /* more testing */
         WaypointData waypointData = new WaypointData("1", 60.052229, 19.907767, 15,
                 latestData.getLatitude(), latestData.getLongitude(), 15);
-        // Direction: south, speed: 5 m/s
+        // Direction: from north, speed: 5 m/s
         WindData windData = new WindData(0, 5);
 
         Calculations calculations = new Calculations(latestData, waypointData, windData);
