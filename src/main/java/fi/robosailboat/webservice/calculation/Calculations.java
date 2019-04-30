@@ -53,6 +53,7 @@ public class Calculations {
 
     // State variable (inout variable)
     private int tackDirection; // [1] and [2]: tack variable (q).
+                            // if tacking is required => tack direction is either 1 or -1
 
     // Output variables
     private boolean beatingMode; // True if the vessel is in beating motion (zig-zag motion).
