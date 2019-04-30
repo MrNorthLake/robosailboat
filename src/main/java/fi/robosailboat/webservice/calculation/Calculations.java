@@ -124,7 +124,7 @@ public class Calculations {
         desiredHeading = calculateTargetCourse();
         if (desiredHeading != DATA_OUT_OF_RANGE) {
             // True if the desired tack of the vessel is starboard.
-            boolean targetTackStarboard = getTargetTackStarboard(desiredHeading);
+            boolean targetTackStarboard = getTargetTackStarboard(desiredHeading); //need to send to boat?
         }
         //figure out the commands
         rudderCommandAngle = calculateRudderAngle();
