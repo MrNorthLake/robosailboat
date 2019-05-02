@@ -20,6 +20,15 @@ public class CalculationsTest {
     }
 
     @Test
+    public void calculateTrueWindSpeed() {
+        Calculations calculations = new Calculations();
+
+        double result = calculations.calculateTrueWindSpeed(180, 5, 5, 150);
+
+        assertEquals(-0, result, 0.5);
+    }
+
+    @Test
     public void distanceBetween() {
         Calculations calculations = new Calculations();
 
