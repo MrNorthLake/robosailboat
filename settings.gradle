@@ -4,3 +4,5 @@ pluginManagement {
 	}
 }
 rootProject.name = 'webservice'
+include 'WindCommunication'
+
