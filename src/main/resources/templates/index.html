@@ -8,6 +8,16 @@
   <head>
   <body>
     <script>
+      function updateWindDirection() {
+        $.get("windDirection", function(windDirection) {
+          $("#windDirection").replaceWith(windDirection);
+        });
+      }
+      function updateWindSpeed() {
+        $.get("windSpeed", function(windSpeed) {
+          $("#windSpeed").replaceWith(windSpeed);
+        });
+      }
       function updateHeading() {
         $.get("heading", function(heading) {
           $("#heading").replaceWith(heading);
@@ -19,6 +29,8 @@
         });
       }
 
+      setInterval(updateWindDirection, 3000);
+      setInterval(updateWindSpeed, 3000);
       setInterval(updateHeading, 3000);
       setInterval(updatePosition, 3000);
     </script>
@@ -28,7 +40,8 @@
       </header>
       <article class="main">
         <h2>Current data:</h2>
-        <p>Wind: <span id="wind" th:text="${wind}"/><p/>
+        <p>Wind Direction: <span id="windDirection" th:text="${windDirection}"/><p/>
+        <p>Wind Speed: <span id="windSpeed" th:text="${windSpeed}"/><p/>
         <p>Heading: <span id="heading" th:text="${heading}"/></p>
         <p>Position: <span id="position" th:text="${position}"/></p>
       </article>
