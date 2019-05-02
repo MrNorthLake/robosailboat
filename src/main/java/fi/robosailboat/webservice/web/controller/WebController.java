@@ -2,6 +2,7 @@ package fi.robosailboat.webservice.web.controller;
 
 import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
 import fi.robosailboat.webservice.robosailboatLib.repository.LoggingRepository;
+import fi.robosailboat.webservice.weatherStationCommunication.SimpleMqttCallback;
 import fi.robosailboat.webservice.web.service.WriteDataToCSV;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,7 +17,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.ArrayList;
+
 
 @Controller
 public class WebController {
@@ -27,16 +28,22 @@ public class WebController {
     @RequestMapping("/")
     public String home(Model model) {
         SensorData latestData = loggingRepository.findTopByOrderByCreatedDesc();
-        model.addAttribute("wind", "wind test");
+        model.addAttribute("windDirection", SimpleMqttCallback.getLatestWeather().getDirection());
+        model.addAttribute("windSpeed", SimpleMqttCallback.getLatestWeather().getSpeed());
         model.addAttribute("heading", latestData.getCompassHeading());
         model.addAttribute("position", latestData.getLatitude()+", "+latestData.getLongitude());
         return "index";
     }
 
-    @RequestMapping(value="/wind", method=RequestMethod.GET)
-    public String getWind(Model model) {
-        model.addAttribute("wind", "wind test");
-        return "index :: #wind";
+    @RequestMapping(value="/windDirection", method=RequestMethod.GET)
+    public String getWindDirection(Model model) {
+        model.addAttribute("windDirection", SimpleMqttCallback.getLatestWeather().getDirection());
+        return "index :: #windDirection";
+    }
+    @RequestMapping(value="/windSpeed", method=RequestMethod.GET)
+    public String getWindSpeed(Model model) {
+        model.addAttribute("windSpeed", SimpleMqttCallback.getLatestWeather().getSpeed());
+        return "index :: #windSpeed";
     }
 
     @RequestMapping(value="/heading", method=RequestMethod.GET)
