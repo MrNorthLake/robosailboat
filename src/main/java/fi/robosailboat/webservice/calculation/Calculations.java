@@ -63,6 +63,7 @@ public class Calculations {
     private double sailCommandAngle; // degrees
 
     public Calculations() {
+        LOG.info("Initialising values...");
         init();
 
         // Max and min angles
@@ -100,6 +101,7 @@ public class Calculations {
 
     /* Must set values for all calculations to work. */
     public void setData(SensorData sensorData, WaypointData waypointData, WindData windData) {
+        LOG.info("Setting data...");
         vesselLat = sensorData.getLatitude();
         vesselLon = sensorData.getLongitude();
         vesselHeading = sensorData.getCompassHeading();
@@ -117,16 +119,20 @@ public class Calculations {
         double windSpeed = windData.getWindSpeed();
 
         trueWindDirection = calculateTrueWindDirection(windDir, windSpeed, gpsSpeed, vesselHeading);
+        LOG.info("Calculated true wind direction: " + trueWindDirection);
         trueWindSpeed = calculateTrueWindSpeed(windDir, windSpeed, gpsSpeed, vesselHeading);
+        LOG.info("Calculated true wind speed: " + trueWindSpeed);
 
         addValueToTwdBuffer(trueWindDirection);
 
         calculateApparentWind(windDir, windSpeed, gpsSpeed, vesselHeading);
+        LOG.info("Calculated apparent wind direction: " + apparentWindDirection);
     }
 
     public Command getNextCommand() {
         checkIfEnteredWaypoint();
         desiredHeading = calculateTargetCourse();
+        LOG.info("Calculated desired heading (target course): " + desiredHeading);
         if (desiredHeading != DATA_OUT_OF_RANGE) {
             // True if the desired tack of the vessel is starboard.
             boolean targetTackStarboard = getTargetTackStarboard(desiredHeading); //need to send to boat?
@@ -136,6 +142,7 @@ public class Calculations {
         // +90 degrees for converting to Arduino
         rudderCommandAngle += 90;
         sailCommandAngle = calculateSailAngle();
+        LOG.info("Got rudder angle: " + rudderCommandAngle + " and sail angle: " + sailCommandAngle);
 
         return new Command(rudderCommandAngle, sailCommandAngle);
     }
@@ -144,10 +151,12 @@ public class Calculations {
     public double calculateRudderAngle() {
         if (desiredHeading != DATA_OUT_OF_RANGE && vesselHeading != DATA_OUT_OF_RANGE) {
             double differenceHeading = (vesselHeading - desiredHeading) * Math.PI / 180; //radians
+            LOG.info("In calculateRudderAngle, got difference heading: " + differenceHeading);
 
             // Wrong sense because over +/- 90°
             if (Math.cos(differenceHeading) < 0) {
                 // Max Rudder angle in the opposite way
+                LOG.info("Max rudder angle in opposite direction");
                 return sgn(Math.sin(differenceHeading)) * maxRudderAngle;
             } else {
                 // Regulation of the rudder
@@ -272,15 +281,20 @@ public class Calculations {
             nextWaypointRadius == DATA_OUT_OF_RANGE) {
             return DATA_OUT_OF_RANGE;
         } else {
+            LOG.info("In calculateTargetCourse()");
             // Calculate the angle of the true wind vector.     [1]:(psi)       [2]:(psi_tw).
             double meanTrueWindDir = meanOfAngles(twdBuffer);
+            LOG.info("meanTrueWindDir: " + meanTrueWindDir);
             double trueWindAngle = limitRadianAngleRange((meanTrueWindDir * Math.PI / 180) + Math.PI);
+            LOG.info("trueWindAngle: " + trueWindAngle);
 
             // Calculate signed distance to the line.           [1] and [2]: (e).
             double signedDistance = calculateSignedDistanceToLine();
+            LOG.info("signedDistance: " + signedDistance);
 
             // Calculate the angle of the line to be followed.  [1]:(phi)       [2]:(beta)
             double phi = calculateAngleOfDesiredTrajectory();
+            LOG.info("phi: " + phi);
 
             // Calculate the target course in nominal mode.     [1]:(theta_*)   [2]:(theta_r)
             double targetCourse = phi + (2 * incidenceAngle / Math.PI) * Math.atan(signedDistance / maxDistanceFromLine);
@@ -288,6 +302,7 @@ public class Calculations {
 
             // Change tack direction when reaching tacking distance
             if (Math.abs(signedDistance) > tackingDistance) {
+                LOG.info("Changing tack direction...");
                 tackDirection = sgn(signedDistance);
             }
 
@@ -295,14 +310,17 @@ public class Calculations {
             if ((Math.cos(trueWindAngle - targetCourse) + Math.cos(closeHauledAngle) < 0) ||
                ((Math.cos(trueWindAngle - phi) + Math.cos(closeHauledAngle) < 0) && (Math.abs(signedDistance) < maxDistanceFromLine))) {
                 // Close hauled mode (Upwind beating mode).
+                LOG.info("Close hauled mode");
                 beatingMode = true;
                 targetCourse = Math.PI + trueWindAngle + tackDirection * closeHauledAngle;
             } else if ((Math.cos(trueWindAngle - targetCourse) - Math.cos(broadReachAngle) > 0) ||
                     ((Math.cos(trueWindAngle - phi) - Math.cos(broadReachAngle) > 0) && (Math.abs(signedDistance) < maxDistanceFromLine))) {
                 // Broad reach mode (Downwind beating mode).
+                LOG.info("Broad reach mode");
                 beatingMode = true;
                 targetCourse = trueWindAngle + tackDirection * broadReachAngle;
             } else {
+                LOG.info("beatingMode = false");
                 beatingMode = false;
             }
 
@@ -320,6 +338,7 @@ public class Calculations {
         double distanceToWaypoint = distanceBetween(vesselLat, vesselLon, nextWaypointLat, nextWaypointLon);
 
         if (distanceAfterWaypoint > 0 || distanceToWaypoint < nextWaypointRadius) {
+            LOG.info("Setting previous waypoint to boat position...");
             prevWaypointLon = vesselLon;
             prevWaypointLat = vesselLat;
         }
@@ -351,6 +370,7 @@ public class Calculations {
 
         double b = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double distance = radiusOfEarth * b * 1000; //meters
+        LOG.info("Distance between: " + distance);
 
         return distance;
 
