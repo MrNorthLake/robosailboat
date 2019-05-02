@@ -2,7 +2,6 @@ package fi.robosailboat.webservice.calculation;
 
 import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
 import fi.robosailboat.webservice.boatCommunication.dto.WaypointData;
-import fi.robosailboat.webservice.boatCommunication.dto.WindData;
 import fi.robosailboat.webservice.calculation.Calculations;
 import org.junit.Test;
 

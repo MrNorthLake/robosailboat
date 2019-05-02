@@ -3,7 +3,7 @@ package fi.robosailboat.webservice.calculation;
 import fi.robosailboat.webservice.boatCommunication.dto.Command;
 import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
 import fi.robosailboat.webservice.boatCommunication.dto.WaypointData;
-import fi.robosailboat.webservice.boatCommunication.dto.WindData;
+import fi.robosailboat.webservice.weatherStationCommunication.WeatherDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,13 +100,13 @@ public class Calculations {
     }
 
     /* Must set values for all calculations to work. */
-    public void setData(SensorData sensorData, WaypointData waypointData, WindData windData) {
+    public void setData(SensorData sensorData, WaypointData waypointData, WeatherDTO windData) {
         LOG.info("Setting data...");
         vesselLat = sensorData.getLatitude();
         vesselLon = sensorData.getLongitude();
         vesselHeading = sensorData.getCompassHeading();
 
-        double gpsSpeed = windData.getWindSpeed(); // get from GPS
+        double gpsSpeed = windData.getSpeed(); // get from GPS
 
         nextWaypointLat = waypointData.getNextLatitude();
         nextWaypointLon = waypointData.getNextLongitude();
@@ -115,8 +115,8 @@ public class Calculations {
         prevWaypointLon = waypointData.getPrevLongitude();
         prevWaypointRadius = waypointData.getPrevRadius();
 
-        double windDir = windData.getWindDirection();
-        double windSpeed = windData.getWindSpeed();
+        double windDir = windData.getDirection();
+        double windSpeed = windData.getSpeed();
 
         trueWindDirection = calculateTrueWindDirection(windDir, windSpeed, gpsSpeed, vesselHeading);
         LOG.info("Calculated true wind direction: " + trueWindDirection);

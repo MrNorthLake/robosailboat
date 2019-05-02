@@ -2,7 +2,7 @@ package fi.robosailboat.webservice.dataValidation;
 
 import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
 import fi.robosailboat.webservice.boatCommunication.dto.WaypointData;
-import fi.robosailboat.webservice.boatCommunication.dto.WindData;
+import fi.robosailboat.webservice.weatherStationCommunication.SimpleMqttCallback;
 import fi.robosailboat.webservice.calculation.Calculations;
 
 public class Validation {
@@ -10,7 +10,6 @@ public class Validation {
     private SensorData latestData;
     private SensorData expectedData;
     private WaypointData waypointData = new WaypointData("", 0, 0, 0, 0, 0, 0);
-    private WindData windData = new WindData(0, 0);
     int maxDistanceDiff; // Max distance difference between latest and expected in meters
     double maxDirectionDiff; // Max difference in direction
 
@@ -25,7 +24,7 @@ public class Validation {
     public void validate(){
 
         Calculations calculations = new Calculations();
-        calculations.setData(latestData, waypointData, windData);
+        calculations.setData(latestData, waypointData, SimpleMqttCallback.getLatestWeather());
         double distanceDiff = calculations.distanceBetween(latestData.getLatitude(), latestData.getLongitude(),
                 expectedData.getLatitude(), expectedData.getLongitude());
 

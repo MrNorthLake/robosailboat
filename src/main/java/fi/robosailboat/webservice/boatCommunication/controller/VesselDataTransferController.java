@@ -3,7 +3,6 @@ package fi.robosailboat.webservice.boatCommunication.controller;
 import fi.robosailboat.webservice.boatCommunication.dto.Command;
 import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
 import fi.robosailboat.webservice.boatCommunication.dto.WaypointData;
-import fi.robosailboat.webservice.boatCommunication.dto.WindData;
 import fi.robosailboat.webservice.calculation.Calculations;
 import fi.robosailboat.webservice.robosailboatLib.repository.LoggingRepository;
 import fi.robosailboat.webservice.weatherStationCommunication.SimpleMqttCallback;
@@ -39,10 +38,8 @@ public class VesselDataTransferController {
         /* more testing */
         WaypointData waypointData = new WaypointData("1", 60.052229, 19.907767, 15,
                 latestData.getLatitude(), latestData.getLongitude(), 15);
-        // Direction: from north, speed: 5 m/s
-        WindData windData = new WindData(0, 5);
 
-        calculations.setData(latestData, waypointData, windData);
+        calculations.setData(latestData, waypointData, SimpleMqttCallback.getLatestWeather());
 
         /*Random respons command with values between 60 and 120*/
         Random rnd = new Random();
