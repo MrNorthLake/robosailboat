@@ -106,7 +106,7 @@ public class Calculations {
         vesselLon = sensorData.getLongitude();
         vesselHeading = sensorData.getCompassHeading();
 
-        double gpsSpeed = 1; // get from GPS
+        double gpsSpeed = windData.getWindSpeed(); // get from GPS
 
         nextWaypointLat = waypointData.getNextLatitude();
         nextWaypointLon = waypointData.getNextLongitude();
@@ -185,12 +185,12 @@ public class Calculations {
         } else if (windsensorDir > 359.999) {
             windsensorDir = 359.999;
         }
+        double windSensorDirRadian = Math.toRadians(windsensorDir);
 
         double trueWindSpeed = Math.sqrt((windsensorSpeed*windsensorSpeed) + (gpsSpeed*gpsSpeed) -
-                (2 * gpsSpeed * windsensorSpeed * Math.cos(windsensorDir / 180 * Math.PI)));
+                (2 * gpsSpeed * windsensorSpeed * Math.cos(windSensorDirRadian)));
 
-        double alpha = Math.acos((windsensorSpeed * Math.cos(windsensorDir / 180 * Math.PI) - gpsSpeed) / trueWindSpeed)
-                * 180 / Math.PI;
+        double alpha = Math.acos((windsensorSpeed * Math.cos(windSensorDirRadian) - gpsSpeed) / trueWindSpeed);
 
         double twd = 0;
         if (windsensorDir > 180) {

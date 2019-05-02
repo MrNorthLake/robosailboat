@@ -11,6 +11,15 @@ import static org.junit.Assert.*;
 public class CalculationsTest {
 
     @Test
+    public void calculateTrueWindDirection() {
+        Calculations calculations = new Calculations();
+
+        double result = calculations.calculateTrueWindDirection(180, 5, 5, 150);
+
+        assertEquals(153, result, 0.5);
+    }
+
+    @Test
     public void distanceBetween() {
         Calculations calculations = new Calculations();
 
