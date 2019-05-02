@@ -6,10 +6,13 @@ import fi.robosailboat.webservice.boatCommunication.dto.WaypointData;
 import fi.robosailboat.webservice.boatCommunication.dto.WindData;
 import fi.robosailboat.webservice.calculation.Calculations;
 import fi.robosailboat.webservice.robosailboatLib.repository.LoggingRepository;
+import fi.robosailboat.webservice.weatherStationCommunication.SimpleMqttCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Random;
 
 @RestController
 @RequestMapping("/dataTransfer")
@@ -41,7 +44,13 @@ public class VesselDataTransferController {
 
         calculations.setData(latestData, waypointData, windData);
 
-        return calculations.getNextCommand();
+        /*Random respons command with values between 60 and 120*/
+        Random rnd = new Random();
+        int rAngle = rnd.nextInt(61)+60;
+        int sAngle = rnd.nextInt(61)+60;
+
+        return  new Command((double)rAngle, (double)sAngle);
+        //return calculations.getNextCommand();
     }
 
 }
