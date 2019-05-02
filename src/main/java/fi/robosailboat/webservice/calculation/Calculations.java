@@ -2,6 +2,11 @@ package fi.robosailboat.webservice.calculation;
 
 import fi.robosailboat.webservice.boatCommunication.dto.Command;
 import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
+import fi.robosailboat.webservice.boatCommunication.dto.WaypointData;
+import fi.robosailboat.webservice.boatCommunication.dto.WindData;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.*;
 import java.util.*;
@@ -9,7 +14,22 @@ import java.util.Vector;
 
 public class Calculations {
 
+    private static Logger LOG = LoggerFactory.getLogger(Calculations.class);
+
+    // Constants
     private final int DATA_OUT_OF_RANGE = -2000;
+    private final int NO_COMMAND = -1000;
+
+    // For rudder angle calculation
+    private double desiredHeading; // degrees [0, 360[ in North-East reference frame (clockwise)
+    private double vesselHeading; // degrees [0, 360[ in North-East reference frame (clockwise)
+    private double maxRudderAngle; // degrees
+
+    // For sail angle calculation
+    private double maxSailAngle; // degrees
+    private double minSailAngle; // degrees
+    private double apparentWindDirection; // degrees [0, 360[ in North-East reference frame (clockwise)
+
     private double prevWaypointLat;
     private double prevWaypointLon;
     private double prevWaypointRadius; // m
@@ -20,98 +40,194 @@ public class Calculations {
     private double vesselLon;
     private double trueWindSpeed; // m/s
     private double trueWindDirection; // degree [0, 360[ in North-East reference frame (clockwise)
-    private Vector<Float> twdBuffer; // True wind direction buffer.
+    private Vector<Double> twdBuffer; // True wind direction buffer.
+    private int twdBufferMaxSize = 200;
 
     // Vecteur field parameters
-    private float incidenceAngle; // radian
-    private float maxDistanceFromLine; // meters
+    private double incidenceAngle; // radian
+    private double maxDistanceFromLine; // meters
 
     // Beating sailing mode parameters
-    private float closeHauledAngle; // radian
-    private float broadReachAngle; // radian
-    private float tackingDistance; // meters
+    private double closeHauledAngle; // radian
+    private double broadReachAngle; // radian
+    private double tackingDistance; // meters
 
     // State variable (inout variable)
     private int tackDirection; // [1] and [2]: tack variable (q).
+                            // if tacking is required => tack direction is either 1 or -1
 
     // Output variables
     private boolean beatingMode; // True if the vessel is in beating motion (zig-zag motion).
 
-    private double rudderCommandAngle;
-    private double sailCommandAngle;
+    private double rudderCommandAngle; // degrees [-30, +30[ in vessel reference frame (clockwise from top view)
+    private double sailCommandAngle; // degrees
 
-    public Calculations(SensorData latestData) {
+    public Calculations() {
+        LOG.info("Initialising values...");
+        init();
 
-        vesselLat = latestData.getLatitude();
-        vesselLon = latestData.getLongitude();
+        // Max and min angles
+        maxRudderAngle = 30;
+        maxSailAngle = 120; //??
+        minSailAngle = 60; //??
 
         // Default values (from sailingrobots)
         tackDirection = 1;
         beatingMode = false;
-        incidenceAngle = (float)(90 * Math.PI / 180);
+        incidenceAngle = Math.toRadians(90);
         maxDistanceFromLine = 20;
 
-        closeHauledAngle = (float)(45 * Math.PI / 180);
-        broadReachAngle = (float)(30 * Math.PI / 180);
+        closeHauledAngle = Math.toRadians(45);
+        broadReachAngle = Math.toRadians(30);
         tackingDistance = 15;
     }
 
+    public void init() {
+        desiredHeading = DATA_OUT_OF_RANGE;
+        vesselHeading = DATA_OUT_OF_RANGE;
+        vesselLat = DATA_OUT_OF_RANGE;
+        vesselLon = DATA_OUT_OF_RANGE;
+        prevWaypointLat = DATA_OUT_OF_RANGE;
+        prevWaypointLon = DATA_OUT_OF_RANGE;
+        prevWaypointRadius = DATA_OUT_OF_RANGE;
+        nextWaypointLat = DATA_OUT_OF_RANGE;
+        nextWaypointLon = DATA_OUT_OF_RANGE;
+        nextWaypointRadius = DATA_OUT_OF_RANGE;
+        trueWindSpeed = DATA_OUT_OF_RANGE;
+        trueWindDirection = DATA_OUT_OF_RANGE;
+        apparentWindDirection = DATA_OUT_OF_RANGE;
+        twdBuffer = new Vector<>();
+    }
+
+    /* Must set values for all calculations to work. */
+    public void setData(SensorData sensorData, WaypointData waypointData, WindData windData) {
+        LOG.info("Setting data...");
+        vesselLat = sensorData.getLatitude();
+        vesselLon = sensorData.getLongitude();
+        vesselHeading = sensorData.getCompassHeading();
+
+        double gpsSpeed = windData.getWindSpeed(); // get from GPS
+
+        nextWaypointLat = waypointData.getNextLatitude();
+        nextWaypointLon = waypointData.getNextLongitude();
+        nextWaypointRadius = waypointData.getNextRadius();
+        prevWaypointLat = waypointData.getPrevLatitude();
+        prevWaypointLon = waypointData.getPrevLongitude();
+        prevWaypointRadius = waypointData.getPrevRadius();
+
+        double windDir = windData.getWindDirection();
+        double windSpeed = windData.getWindSpeed();
+
+        trueWindDirection = calculateTrueWindDirection(windDir, windSpeed, gpsSpeed, vesselHeading);
+        LOG.info("Calculated true wind direction: " + trueWindDirection);
+        trueWindSpeed = calculateTrueWindSpeed(windDir, windSpeed, gpsSpeed, vesselHeading);
+        LOG.info("Calculated true wind speed: " + trueWindSpeed);
+
+        addValueToTwdBuffer(trueWindDirection);
+
+        calculateApparentWind(windDir, windSpeed, gpsSpeed, vesselHeading);
+        LOG.info("Calculated apparent wind direction: " + apparentWindDirection);
+    }
+
     public Command getNextCommand() {
-        Runnable r = new Runnable() {
-            public void run() {
-                checkIfEnteredWaypoint();
-                double targetCourse = calculateTargetCourse();
-                if (targetCourse != DATA_OUT_OF_RANGE) {
-                    boolean targetTackStarboard = getTargetTackStarboard(targetCourse);
-                    //figure out the commands
-                }
-            }
-        };
-        Thread thread = new Thread(r);
-        thread.run(); //thread.start() or thread.run()
+        checkIfEnteredWaypoint();
+        desiredHeading = calculateTargetCourse();
+        LOG.info("Calculated desired heading (target course): " + desiredHeading);
+        if (desiredHeading != DATA_OUT_OF_RANGE) {
+            // True if the desired tack of the vessel is starboard.
+            boolean targetTackStarboard = getTargetTackStarboard(desiredHeading); //need to send to boat?
+        }
+        //figure out the commands
+        rudderCommandAngle = calculateRudderAngle();
+        // +90 degrees for converting to Arduino
+        rudderCommandAngle += 90;
+        sailCommandAngle = calculateSailAngle();
+        LOG.info("Got rudder angle: " + rudderCommandAngle + " and sail angle: " + sailCommandAngle);
 
         return new Command(rudderCommandAngle, sailCommandAngle);
     }
 
     /* Calculates the command rudder angle according to the course difference. Reused code from sailingrobots. */
     public double calculateRudderAngle() {
-        // degrees [0, 360[ in North-East reference frame (clockwise)
-        double desiredCourse = 0; // get desired course from db?
-        // degrees [0, 360[ in North-East reference frame (clockwise)
-        double vesselCourse = 0; // get current course...
-        // degrees
-        double maxRudderAngle = 0; // get from somewhere...
-
-        if (desiredCourse != DATA_OUT_OF_RANGE && vesselCourse != DATA_OUT_OF_RANGE) {
-            double differenceHeading = (vesselCourse - desiredCourse) * Math.PI / 180; //radians
+        if (desiredHeading != DATA_OUT_OF_RANGE && vesselHeading != DATA_OUT_OF_RANGE) {
+            double differenceHeading = (vesselHeading - desiredHeading) * Math.PI / 180; //radians
+            LOG.info("In calculateRudderAngle, got difference heading: " + differenceHeading);
 
             // Wrong sense because over +/- 90°
             if (Math.cos(differenceHeading) < 0) {
                 // Max Rudder angle in the opposite way
+                LOG.info("Max rudder angle in opposite direction");
                 return sgn(Math.sin(differenceHeading)) * maxRudderAngle;
             } else {
                 // Regulation of the rudder
                 return Math.sin(differenceHeading) * maxRudderAngle;
             }
         }
-        return -1.0; // "NO COMMAND"
+        return NO_COMMAND;
     }
 
     /* Calculate the sail angle according to a linear relation to the apparent wind direction. Reused code from sailingrobots. */
     public double calculateSailAngle() {
-        // get values...
-        // degrees
-        double maxSailAngle = 0;
-        // degrees
-        double minSailAngle = 0;
-        // degrees [0, 360[ in North-East reference frame (clockwise)
-        double apparentWindDirection = 0;
-
         if (apparentWindDirection != DATA_OUT_OF_RANGE) {
             // Equation from book "Robotic Sailing 2015", page 141
             return (maxSailAngle - minSailAngle) * Math.abs(limitAngleRange180(apparentWindDirection)) / 180 + minSailAngle;
         }
-        return -1.0; // "NO COMMAND"
+        return NO_COMMAND;
+    }
+
+    public double calculateTrueWindDirection(double windsensorDir, double windsensorSpeed, double gpsSpeed, double heading) {
+        if (windsensorSpeed < 0.001) {
+            return heading;
+        }
+
+        if (windsensorDir < 0.001) {
+            windsensorDir = 0.001;
+        } else if (windsensorDir > 359.999) {
+            windsensorDir = 359.999;
+        }
+        double windSensorDirRadian = Math.toRadians(windsensorDir);
+
+        double trueWindSpeed = Math.sqrt((windsensorSpeed*windsensorSpeed) + (gpsSpeed*gpsSpeed) -
+                (2 * gpsSpeed * windsensorSpeed * Math.cos(windSensorDirRadian)));
+
+        double alpha = Math.acos((windsensorSpeed * Math.cos(windSensorDirRadian) - gpsSpeed) / trueWindSpeed);
+
+        double twd = 0;
+        if (windsensorDir > 180) {
+            twd = limitAngleRange(heading - alpha);
+        } else {
+            twd = limitAngleRange(heading + alpha);
+        }
+        return twd;
+    }
+
+    public double calculateTrueWindSpeed(double windsensorDir, double windsensorSpeed, double gpsSpeed, double heading) {
+        if (windsensorSpeed < 0.001) {
+            return gpsSpeed;
+        }
+
+        double apparentWindAngle = Math.toRadians(windsensorDir);
+
+        if (apparentWindAngle < 0.001) {
+            apparentWindAngle = 0.001;
+        } else if (apparentWindAngle > 359.999) {
+            apparentWindAngle = 359.999;
+        }
+
+        double u = gpsSpeed * Math.sin(heading) - windsensorSpeed * Math.sin(apparentWindAngle);
+        double v = gpsSpeed * Math.cos(heading) - windsensorSpeed * Math.cos(apparentWindAngle);
+
+        return Math.atan(u/v);
+    }
+
+    public void calculateApparentWind(double windsensorDir, double windsensorSpeed, double gpsSpeed, double heading) {
+        double wcaw[] = {
+                trueWindSpeed * Math.cos((trueWindDirection+Math.PI) - heading) - gpsSpeed,
+                trueWindSpeed * Math.sin((trueWindDirection+Math.PI) - heading)
+        };
+
+        //apparentWindSpeed = Math.sqrt(Math.pow(wcaw[0], 2) + Math.pow(wcaw[1], 2));
+        apparentWindDirection = Math.toDegrees(-Math.atan2(wcaw[0], wcaw[1]));
     }
 
     /* Calculates the angle of the line to be followed. Reused from sailingrobots. */
@@ -119,23 +235,23 @@ public class Calculations {
         int earthRadius = 6371000; //meters
 
         double prevWPCoord[] = {
-            earthRadius * Math.cos(prevWaypointLat * Math.PI / 180) * Math.cos(prevWaypointLon * Math.PI / 180),
-            earthRadius * Math.cos(prevWaypointLat * Math.PI / 180) * Math.sin(prevWaypointLon * Math.PI / 180),
-            earthRadius * Math.sin(prevWaypointLat * Math.PI / 180)
+            earthRadius * Math.cos(Math.toRadians(prevWaypointLat)) * Math.cos(Math.toRadians(prevWaypointLon)),
+            earthRadius * Math.cos(Math.toRadians(prevWaypointLat)) * Math.sin(Math.toRadians(prevWaypointLon)),
+            earthRadius * Math.sin(Math.toRadians(prevWaypointLat))
         };
 
         double nextWPCoord[] = {
-            earthRadius * Math.cos(nextWaypointLat * Math.PI / 180) * Math.cos(nextWaypointLon * Math.PI / 180),
-            earthRadius * Math.cos(nextWaypointLat * Math.PI / 180) * Math.sin(nextWaypointLon * Math.PI / 180),
-            earthRadius * Math.sin(nextWaypointLat * Math.PI / 180)
+            earthRadius * Math.cos(Math.toRadians(nextWaypointLat)) * Math.cos(Math.toRadians(nextWaypointLon)),
+            earthRadius * Math.cos(Math.toRadians(nextWaypointLat)) * Math.sin(Math.toRadians(nextWaypointLon)),
+            earthRadius * Math.sin(Math.toRadians(nextWaypointLat))
         };
 
         double m[][] = {
             {-Math.sin(vesselLon * Math.PI / 180), Math.cos(vesselLon * Math.PI / 180), 0},
             {
-                -Math.cos(vesselLon * Math.PI / 180) * Math.sin(vesselLat * Math.PI / 180),
-                -Math.sin(vesselLon * Math.PI / 180) * Math.sin(vesselLat * Math.PI / 180),
-                Math.cos(vesselLat * Math.PI / 180)
+                -Math.cos(Math.toRadians(vesselLon)) * Math.sin(Math.toRadians(vesselLat)),
+                -Math.sin(Math.toRadians(vesselLon)) * Math.sin(Math.toRadians(vesselLat)),
+                Math.cos(Math.toRadians(vesselLon))
             }
         };
 
@@ -165,15 +281,20 @@ public class Calculations {
             nextWaypointRadius == DATA_OUT_OF_RANGE) {
             return DATA_OUT_OF_RANGE;
         } else {
+            LOG.info("In calculateTargetCourse()");
             // Calculate the angle of the true wind vector.     [1]:(psi)       [2]:(psi_tw).
             double meanTrueWindDir = meanOfAngles(twdBuffer);
-            double trueWindAngle = limitRadianAngleRange((meanTrueWindDir * Math.PI / 180) + Math.PI);
+            LOG.info("meanTrueWindDir: " + meanTrueWindDir);
+            double trueWindAngle = limitRadianAngleRange((Math.toRadians(meanTrueWindDir)) + Math.PI);
+            LOG.info("trueWindAngle: " + trueWindAngle);
 
             // Calculate signed distance to the line.           [1] and [2]: (e).
             double signedDistance = calculateSignedDistanceToLine();
+            LOG.info("signedDistance: " + signedDistance);
 
             // Calculate the angle of the line to be followed.  [1]:(phi)       [2]:(beta)
             double phi = calculateAngleOfDesiredTrajectory();
+            LOG.info("phi: " + phi);
 
             // Calculate the target course in nominal mode.     [1]:(theta_*)   [2]:(theta_r)
             double targetCourse = phi + (2 * incidenceAngle / Math.PI) * Math.atan(signedDistance / maxDistanceFromLine);
@@ -181,6 +302,7 @@ public class Calculations {
 
             // Change tack direction when reaching tacking distance
             if (Math.abs(signedDistance) > tackingDistance) {
+                LOG.info("Changing tack direction...");
                 tackDirection = sgn(signedDistance);
             }
 
@@ -188,19 +310,22 @@ public class Calculations {
             if ((Math.cos(trueWindAngle - targetCourse) + Math.cos(closeHauledAngle) < 0) ||
                ((Math.cos(trueWindAngle - phi) + Math.cos(closeHauledAngle) < 0) && (Math.abs(signedDistance) < maxDistanceFromLine))) {
                 // Close hauled mode (Upwind beating mode).
+                LOG.info("Close hauled mode");
                 beatingMode = true;
                 targetCourse = Math.PI + trueWindAngle + tackDirection * closeHauledAngle;
             } else if ((Math.cos(trueWindAngle - targetCourse) - Math.cos(broadReachAngle) > 0) ||
                     ((Math.cos(trueWindAngle - phi) - Math.cos(broadReachAngle) > 0) && (Math.abs(signedDistance) < maxDistanceFromLine))) {
                 // Broad reach mode (Downwind beating mode).
+                LOG.info("Broad reach mode");
                 beatingMode = true;
                 targetCourse = trueWindAngle + tackDirection * broadReachAngle;
             } else {
+                LOG.info("beatingMode = false");
                 beatingMode = false;
             }
 
             targetCourse = limitRadianAngleRange(targetCourse);
-            targetCourse = targetCourse / Math.PI * 180;
+            targetCourse = Math.toDegrees(targetCourse);
 
             return targetCourse;
         }
@@ -213,6 +338,7 @@ public class Calculations {
         double distanceToWaypoint = distanceBetween(vesselLat, vesselLon, nextWaypointLat, nextWaypointLon);
 
         if (distanceAfterWaypoint > 0 || distanceToWaypoint < nextWaypointRadius) {
+            LOG.info("Setting previous waypoint to boat position...");
             prevWaypointLon = vesselLon;
             prevWaypointLat = vesselLat;
         }
@@ -222,7 +348,7 @@ public class Calculations {
     public boolean getTargetTackStarboard(double targetCourse) {
 
         double meanTrueWindDirection = meanOfAngles(twdBuffer);
-        if (Math.sin((targetCourse - meanTrueWindDirection) * Math.PI / 180) < 0) {
+        if (Math.sin(Math.toRadians(targetCourse - meanTrueWindDirection)) < 0) {
             return true;
         }
         return false;
@@ -244,6 +370,7 @@ public class Calculations {
 
         double b = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double distance = radiusOfEarth * b * 1000; //meters
+        LOG.info("Distance between: " + distance);
 
         return distance;
 
@@ -252,9 +379,9 @@ public class Calculations {
     /* Returns bearing to waypoint. Reused code from sailingrobots. */
     public double bearingToWaypoint(double gpsLat, double gpsLon, double wpLat, double wpLon) {
         //In radians
-        double boatLat = gpsLat * Math.PI / 180;
-        double waypointLat = wpLat * Math.PI / 180;
-        double deltaLon = (wpLon - gpsLon) * Math.PI / 180;
+        double boatLat = Math.toRadians(gpsLat);
+        double waypointLat = Math.toRadians(wpLat);
+        double deltaLon = Math.toRadians(wpLon - gpsLon);
 
         double y_coordinate = Math.sin(deltaLon) * Math.cos(waypointLat);
         double x_coordinate = Math.cos(boatLat) * Math.sin(waypointLat)
@@ -262,7 +389,7 @@ public class Calculations {
 
         double bearingToWaypoint = Math.atan2(y_coordinate, x_coordinate);
         //Degrees
-        bearingToWaypoint = bearingToWaypoint / Math.PI * 180;
+        bearingToWaypoint = Math.toDegrees(bearingToWaypoint);
 
         return limitAngleRange(bearingToWaypoint);
     }
@@ -334,15 +461,15 @@ public class Calculations {
     }
 
     /* Calculates mean of values. Reused code from sailingrobots. */
-    private float mean(Vector<Float> values) {
+    private double mean(Vector<Double> values) {
         if (values.size() < 1) {
             return 0;
         }
-        float sum = 0;
+        double sum = 0;
 
         Iterator iterator = values.iterator();
         while(iterator.hasNext()) {
-            sum += (Float)iterator.next();
+            sum += (Double)iterator.next();
         }
 
         return sum / values.size();
@@ -353,20 +480,20 @@ public class Calculations {
      * https://en.wikipedia.org/wiki/Mean_of_circular_quantities
      * Reused code from sailingrobots.
      */
-    private double meanOfAngles(Vector<Float> anglesInDegrees) {
+    private double meanOfAngles(Vector<Double> anglesInDegrees) {
         if (anglesInDegrees.size() < 1) {
             return 0;
         }
-        Vector<Float> xx = new Vector<>();
-        Vector<Float> yy = new Vector<>();
-        float x, y;
+        Vector<Double> xx = new Vector<>();
+        Vector<Double> yy = new Vector<>();
+        double x, y;
 
         // convert all angles to cartesian coordinates
         Iterator iterator = anglesInDegrees.iterator();
         while (iterator.hasNext()) {
-            float degrees = (Float)iterator.next();
-            x = (float)Math.cos(degrees * Math.PI / 180);
-            y = (float)Math.sin(degrees * Math.PI / 180);
+            double degrees = (Double)iterator.next();
+            x = Math.cos(Math.toRadians(degrees));
+            y = Math.sin(Math.toRadians(degrees));
             xx.add(x);
             yy.add(y);
         }
@@ -382,27 +509,36 @@ public class Calculations {
         return meanAngleRadians * 180 / Math.PI;
     }
 
+    /* Add values to twdBuffer. Reused code from sailingrobots. */
+    private void addValueToTwdBuffer(double value) {
+        twdBuffer.add(value);
+
+        if (twdBuffer.size() > twdBufferMaxSize) {
+            twdBuffer.removeElementAt(0);
+        }
+    }
+
     /* Calculates signed distance to line. Reused code from sailingrobots. */
     private double calculateSignedDistanceToLine() {
         int earthRadius = 6371000; //meters
 
         //a
         double prevWPCoord[] = {
-                earthRadius * Math.cos(prevWaypointLat * Math.PI / 180) * Math.cos(prevWaypointLon * Math.PI / 180),
-                earthRadius * Math.cos(prevWaypointLat * Math.PI / 180) * Math.sin(prevWaypointLon * Math.PI / 180),
-                earthRadius * Math.sin(prevWaypointLat * Math.PI / 180)
+                earthRadius * Math.cos(Math.toRadians(prevWaypointLat)) * Math.cos(Math.toRadians(prevWaypointLon)),
+                earthRadius * Math.cos(Math.toRadians(prevWaypointLat)) * Math.sin(Math.toRadians(prevWaypointLon)),
+                earthRadius * Math.sin(Math.toRadians(prevWaypointLat))
         };
         //b
         double nextWPCoord[] = {
-                earthRadius * Math.cos(nextWaypointLat * Math.PI / 180) * Math.cos(nextWaypointLon * Math.PI / 180),
-                earthRadius * Math.cos(nextWaypointLat * Math.PI / 180) * Math.sin(nextWaypointLon * Math.PI / 180),
-                earthRadius * Math.sin(nextWaypointLat * Math.PI / 180)
+                earthRadius * Math.cos(Math.toRadians(nextWaypointLat)) * Math.cos(Math.toRadians(nextWaypointLon)),
+                earthRadius * Math.cos(Math.toRadians(nextWaypointLat)) * Math.sin(Math.toRadians(nextWaypointLon)),
+                earthRadius * Math.sin(Math.toRadians(nextWaypointLat))
         };
         //m
         double boatCoord[] = {
-                earthRadius * Math.cos(vesselLat * Math.PI / 180) * Math.cos(vesselLon * Math.PI / 180),
-                earthRadius * Math.cos(vesselLat * Math.PI / 180) * Math.sin(vesselLon * Math.PI / 180),
-                earthRadius * Math.sin(vesselLat * Math.PI / 180)
+                earthRadius * Math.cos(Math.toRadians(vesselLat)) * Math.cos(Math.toRadians(vesselLon)),
+                earthRadius * Math.cos(Math.toRadians(vesselLat)) * Math.sin(Math.toRadians(vesselLon)),
+                earthRadius * Math.sin(Math.toRadians(vesselLat))
         };
 
         //vector normal to plane
@@ -434,21 +570,21 @@ public class Calculations {
 
         //a
         double prevWPCoord[] = {
-                earthRadius * Math.cos(prevLat * Math.PI / 180) * Math.cos(prevLon * Math.PI / 180),
-                earthRadius * Math.cos(prevLat * Math.PI / 180) * Math.sin(prevLon * Math.PI / 180),
-                earthRadius * Math.sin(prevLat * Math.PI / 180)
+                earthRadius * Math.cos(Math.toRadians(prevLat)) * Math.cos(Math.toRadians(prevLon)),
+                earthRadius * Math.cos(Math.toRadians(prevLat)) * Math.sin(Math.toRadians(prevLon)),
+                earthRadius * Math.sin(Math.toRadians(prevLat))
         };
         //b
         double nextWPCoord[] = {
-                earthRadius * Math.cos(nextLat * Math.PI / 180) * Math.cos(nextLon * Math.PI / 180),
-                earthRadius * Math.cos(nextLat * Math.PI / 180) * Math.sin(nextLon * Math.PI / 180),
-                earthRadius * Math.sin(nextLat * Math.PI / 180)
+                earthRadius * Math.cos(Math.toRadians(nextLat)) * Math.cos(Math.toRadians(nextLon)),
+                earthRadius * Math.cos(Math.toRadians(nextLat)) * Math.sin(Math.toRadians(nextLon)),
+                earthRadius * Math.sin(Math.toRadians(nextLat))
         };
         //m
         double boatCoord[] = {
-                earthRadius * Math.cos(gpsLat * Math.PI / 180) * Math.cos(gpsLon * Math.PI / 180),
-                earthRadius * Math.cos(gpsLat * Math.PI / 180) * Math.sin(gpsLon * Math.PI / 180),
-                earthRadius * Math.sin(gpsLat * Math.PI / 180)
+                earthRadius * Math.cos(Math.toRadians(gpsLat)) * Math.cos(Math.toRadians(gpsLon)),
+                earthRadius * Math.cos(Math.toRadians(gpsLat)) * Math.sin(Math.toRadians(gpsLon)),
+                earthRadius * Math.sin(Math.toRadians(gpsLat))
         };
 
         //vector normal to plane

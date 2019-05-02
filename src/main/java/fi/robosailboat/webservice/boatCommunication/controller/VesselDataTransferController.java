@@ -2,6 +2,9 @@ package fi.robosailboat.webservice.boatCommunication.controller;
 
 import fi.robosailboat.webservice.boatCommunication.dto.Command;
 import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
+import fi.robosailboat.webservice.boatCommunication.dto.WaypointData;
+import fi.robosailboat.webservice.boatCommunication.dto.WindData;
+import fi.robosailboat.webservice.calculation.Calculations;
 import fi.robosailboat.webservice.robosailboatLib.repository.LoggingRepository;
 import fi.robosailboat.webservice.weatherStationCommunication.SimpleMqttCallback;
 import org.slf4j.Logger;
@@ -16,6 +19,7 @@ import java.util.Random;
 public class VesselDataTransferController {
 
     private static Logger LOG = LoggerFactory.getLogger(VesselDataTransferController.class);
+    private Calculations calculations = new Calculations();
 
     @Autowired
     private LoggingRepository loggingRepo;
@@ -32,12 +36,21 @@ public class VesselDataTransferController {
         LOG.info("Latest sensorData. Gps latitud: " + latestData.getLatitude() + " | Gps longitud: " + latestData.getLongitude()
                 + " | Compass direction: " + latestData.getDirection());
 
+        /* more testing */
+        WaypointData waypointData = new WaypointData("1", 60.052229, 19.907767, 15,
+                latestData.getLatitude(), latestData.getLongitude(), 15);
+        // Direction: from north, speed: 5 m/s
+        WindData windData = new WindData(0, 5);
+
+        calculations.setData(latestData, waypointData, windData);
+
         /*Random respons command with values between 60 and 120*/
         Random rnd = new Random();
         int rAngle = rnd.nextInt(61)+60;
         int sAngle = rnd.nextInt(61)+60;
 
         return  new Command((double)rAngle, (double)sAngle);
+        //return calculations.getNextCommand();
     }
 
 }
