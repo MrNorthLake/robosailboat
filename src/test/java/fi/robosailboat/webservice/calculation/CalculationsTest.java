@@ -17,7 +17,7 @@ public class CalculationsTest {
     @Before
     public void init() {
         calculations = new Calculations();
-        SensorData sensorData = new SensorData(60.105381, 19.944503, 180, 0, 0, 150);
+        SensorData sensorData = new SensorData(60.105381, 19.944503, 180, 4, 150);
         WaypointData waypointData = new WaypointData("1", 60.052229, 19.907767, 15,
                 sensorData.getLatitude(), sensorData.getLongitude(), 15);
         WeatherDTO weatherDTO = new WeatherDTO();

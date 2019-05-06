@@ -2,27 +2,19 @@ package fi.robosailboat.webservice.boatCommunication.dto;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
-
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 public class WaypointData {
+    private int index;
+    private double latitude;
+    private double longitude;
+    private double radius;
 
-    @Id
-    private String id;
-    private double nextLatitude;
-    private double nextLongitude;
-    private int nextRadius;
-    private double prevLatitude;
-    private double prevLongitude;
-    private int prevRadius;
-
-    public WaypointData(String id, double nextLatitude, double nextLongitude, int nextRadius, double prevLatitude, double prevLongitude, int prevRadius) {
-        this.id = id;
-        this.nextLatitude = nextLatitude;
-        this.nextLongitude = nextLongitude;
-        this.nextRadius = nextRadius;
-        this.prevLatitude = prevLatitude;
-        this.prevLongitude = prevLongitude;
-        this.prevRadius = prevRadius;
+    public WaypointData(int index, double latitude, double longitude, double radius){
+        this.index = index;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.radius = radius;
     }
 }
