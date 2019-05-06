@@ -100,15 +100,13 @@ public class Calculations {
         vesselLat = sensorData.getLatitude();
         vesselLon = sensorData.getLongitude();
         vesselHeading = sensorData.getCompassHeading();
+        double gpsSpeed = sensorData.getGpsSpeed();
 
-        double gpsSpeed = windData.getSpeed(); // get from GPS
-
-        nextWaypointLat = waypointData.getNextLatitude();
-        nextWaypointLon = waypointData.getNextLongitude();
-        nextWaypointRadius = waypointData.getNextRadius();
-        prevWaypointLat = waypointData.getPrevLatitude();
-        prevWaypointLon = waypointData.getPrevLongitude();
-        prevWaypointRadius = waypointData.getPrevRadius();
+        nextWaypointLat = waypointData.getLatitude();
+        nextWaypointLon = waypointData.getLongitude();
+        nextWaypointRadius = waypointData.getRadius();
+        prevWaypointLat = vesselLat;
+        prevWaypointLon = vesselLon;
 
         double windDir = windData.getDirection();
         double windSpeed = windData.getSpeed();
