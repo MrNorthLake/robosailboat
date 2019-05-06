@@ -506,7 +506,7 @@ public class Calculations {
             meanAngleRadians += 2*Math.PI;
         }
 
-        return meanAngleRadians * 180 / Math.PI;
+        return Math.toDegrees(meanAngleRadians);
     }
 
     /* Add values to twdBuffer. Reused code from sailingrobots. */
