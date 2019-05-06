@@ -17,7 +17,6 @@ public class SensorData {
     private final double latitude;
     private final double longitude;
     private final double direction;
-    private final double track;
     private final double gpsSpeed;
     private final double compassHeading;
 }
