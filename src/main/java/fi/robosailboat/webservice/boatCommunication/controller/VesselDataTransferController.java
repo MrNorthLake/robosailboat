@@ -42,12 +42,12 @@ public class VesselDataTransferController {
         calculations.setData(latestData, waypointData, SimpleMqttCallback.getLatestWeather());
 
         /*Random respons command with values between 60 and 120*/
-        Random rnd = new Random();
+        /*Random rnd = new Random();
         int rAngle = rnd.nextInt(61)+60;
         int sAngle = rnd.nextInt(61)+60;
 
-        return  new Command((double)rAngle, (double)sAngle);
-        //return calculations.getNextCommand();
+        return  new Command((double)rAngle, (double)sAngle);*/
+        return calculations.getNextCommand();
     }
 
 }
