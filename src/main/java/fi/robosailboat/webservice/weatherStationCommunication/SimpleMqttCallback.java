@@ -2,9 +2,7 @@ package fi.robosailboat.webservice.weatherStationCommunication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.json.JSONParser;
 import org.eclipse.paho.client.mqttv3.*;
-import org.json.JSONObject;
 
 @Slf4j
 public class SimpleMqttCallback implements MqttCallback {
@@ -37,7 +35,6 @@ public class SimpleMqttCallback implements MqttCallback {
         options.setConnectionTimeout(10);
         return options;
     }
-
     @Override
     public void connectionLost(Throwable cause) {
         log.info("Connection lost because: " + cause);
