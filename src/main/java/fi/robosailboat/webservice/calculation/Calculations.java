@@ -3,7 +3,7 @@ package fi.robosailboat.webservice.calculation;
 import fi.robosailboat.webservice.boatCommunication.dto.Command;
 import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
 import fi.robosailboat.webservice.boatCommunication.dto.WaypointData;
-import fi.robosailboat.webservice.boatCommunication.dto.WindData;
+import fi.robosailboat.webservice.weatherStationCommunication.WeatherDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +23,11 @@ public class Calculations {
     // For rudder angle calculation
     private double desiredHeading; // degrees [0, 360[ in North-East reference frame (clockwise)
     private double vesselHeading; // degrees [0, 360[ in North-East reference frame (clockwise)
-    private double maxRudderAngle; // degrees
+    private double maxRudderAngle = 30; // degrees
 
     // For sail angle calculation
-    private double maxSailAngle; // degrees
-    private double minSailAngle; // degrees
+    private double maxSailAngle = 120; // degrees
+    private double minSailAngle = 60; // degrees
     private double apparentWindDirection; // degrees [0, 360[ in North-East reference frame (clockwise)
 
     private double prevWaypointLat;
@@ -66,11 +66,6 @@ public class Calculations {
         LOG.info("Initialising values...");
         init();
 
-        // Max and min angles
-        maxRudderAngle = 30;
-        maxSailAngle = 120; //??
-        minSailAngle = 60; //??
-
         // Default values (from sailingrobots)
         tackDirection = 1;
         beatingMode = false;
@@ -100,13 +95,13 @@ public class Calculations {
     }
 
     /* Must set values for all calculations to work. */
-    public void setData(SensorData sensorData, WaypointData waypointData, WindData windData) {
+    public void setData(SensorData sensorData, WaypointData waypointData, WeatherDTO windData) {
         LOG.info("Setting data...");
         vesselLat = sensorData.getLatitude();
         vesselLon = sensorData.getLongitude();
         vesselHeading = sensorData.getCompassHeading();
 
-        double gpsSpeed = windData.getWindSpeed(); // get from GPS
+        double gpsSpeed = windData.getSpeed(); // get from GPS
 
         nextWaypointLat = waypointData.getNextLatitude();
         nextWaypointLon = waypointData.getNextLongitude();
@@ -115,8 +110,8 @@ public class Calculations {
         prevWaypointLon = waypointData.getPrevLongitude();
         prevWaypointRadius = waypointData.getPrevRadius();
 
-        double windDir = windData.getWindDirection();
-        double windSpeed = windData.getWindSpeed();
+        double windDir = windData.getDirection();
+        double windSpeed = windData.getSpeed();
 
         trueWindDirection = calculateTrueWindDirection(windDir, windSpeed, gpsSpeed, vesselHeading);
         LOG.info("Calculated true wind direction: " + trueWindDirection);
@@ -133,10 +128,7 @@ public class Calculations {
         checkIfEnteredWaypoint();
         desiredHeading = calculateTargetCourse();
         LOG.info("Calculated desired heading (target course): " + desiredHeading);
-        if (desiredHeading != DATA_OUT_OF_RANGE) {
-            // True if the desired tack of the vessel is starboard.
-            boolean targetTackStarboard = getTargetTackStarboard(desiredHeading); //need to send to boat?
-        }
+
         //figure out the commands
         rudderCommandAngle = calculateRudderAngle();
         // +90 degrees for converting to Arduino
@@ -344,16 +336,6 @@ public class Calculations {
         }
     }
 
-    /* Returns true if the desired tack of the vessel is starboard. Reused code from sailingrobots. */
-    public boolean getTargetTackStarboard(double targetCourse) {
-
-        double meanTrueWindDirection = meanOfAngles(twdBuffer);
-        if (Math.sin(Math.toRadians(targetCourse - meanTrueWindDirection)) < 0) {
-            return true;
-        }
-        return false;
-    }
-
     /*Return distance in meters between two Gps points. Reused code from sailingrobot github*/
     public double distanceBetween(double lat1, double lon1, double lat2, double lon2){
 
@@ -506,7 +488,7 @@ public class Calculations {
             meanAngleRadians += 2*Math.PI;
         }
 
-        return meanAngleRadians * 180 / Math.PI;
+        return Math.toDegrees(meanAngleRadians);
     }
 
     /* Add values to twdBuffer. Reused code from sailingrobots. */
