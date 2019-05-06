@@ -27,7 +27,6 @@ public class WriteDataToCSV {
                         String.valueOf(data.getLatitude()),
                         String.valueOf(data.getLongitude()),
                         String.valueOf(data.getDirection()),
-                        String.valueOf(data.getTrack()),
                         String.valueOf(data.getCompassHeading()),
                 };
 
