@@ -23,11 +23,11 @@ public class Calculations {
     // For rudder angle calculation
     private double desiredHeading; // degrees [0, 360[ in North-East reference frame (clockwise)
     private double vesselHeading; // degrees [0, 360[ in North-East reference frame (clockwise)
-    private double maxRudderAngle; // degrees
+    private double maxRudderAngle = 30; // degrees
 
     // For sail angle calculation
-    private double maxSailAngle; // degrees
-    private double minSailAngle; // degrees
+    private double maxSailAngle = 120; // degrees
+    private double minSailAngle = 60; // degrees
     private double apparentWindDirection; // degrees [0, 360[ in North-East reference frame (clockwise)
 
     private double prevWaypointLat;
@@ -65,11 +65,6 @@ public class Calculations {
     public Calculations() {
         LOG.info("Initialising values...");
         init();
-
-        // Max and min angles
-        maxRudderAngle = 30;
-        maxSailAngle = 120; //??
-        minSailAngle = 60; //??
 
         // Default values (from sailingrobots)
         tackDirection = 1;
@@ -133,10 +128,7 @@ public class Calculations {
         checkIfEnteredWaypoint();
         desiredHeading = calculateTargetCourse();
         LOG.info("Calculated desired heading (target course): " + desiredHeading);
-        if (desiredHeading != DATA_OUT_OF_RANGE) {
-            // True if the desired tack of the vessel is starboard.
-            boolean targetTackStarboard = getTargetTackStarboard(desiredHeading); //need to send to boat?
-        }
+
         //figure out the commands
         rudderCommandAngle = calculateRudderAngle();
         // +90 degrees for converting to Arduino
@@ -342,16 +334,6 @@ public class Calculations {
             prevWaypointLon = vesselLon;
             prevWaypointLat = vesselLat;
         }
-    }
-
-    /* Returns true if the desired tack of the vessel is starboard. Reused code from sailingrobots. */
-    public boolean getTargetTackStarboard(double targetCourse) {
-
-        double meanTrueWindDirection = meanOfAngles(twdBuffer);
-        if (Math.sin(Math.toRadians(targetCourse - meanTrueWindDirection)) < 0) {
-            return true;
-        }
-        return false;
     }
 
     /*Return distance in meters between two Gps points. Reused code from sailingrobot github*/

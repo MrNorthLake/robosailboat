@@ -60,12 +60,4 @@ public class CalculationsTest {
 
         assertEquals( 753, result,0.5);
     }
-
-    @Test
-    public void getTargetTackStarboard() {
-        double targetCourse = calculations.calculateTargetCourse();
-        boolean result = calculations.getTargetTackStarboard(targetCourse);
-
-        assertEquals(result, false);
-    }
 }
