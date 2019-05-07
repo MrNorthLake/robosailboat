@@ -34,7 +34,7 @@ public class CalculationsTest {
         assertEquals("087", next.getS());
 
         SensorData sensorData = new SensorData(60.104568, 19.945619, 0, 5, 30);
-        WaypointData waypointData = new WaypointData(2, 60.104718, 19.946027, 15);
+        WaypointData waypointData = new WaypointData(2, 60.104718, 19.946027);
         WeatherDTO weatherDTO = new WeatherDTO();
         weatherDTO.setDirection(30);
         weatherDTO.setSpeed(5);
