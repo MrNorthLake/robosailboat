@@ -14,7 +14,7 @@
         <h2>Waypoints</h2>
         <section>
             <ul class="waypoint-list">
-                <li th:each="waypoint : ${waypoints}">
+                <li class="waypoint-li" th:each="waypoint : ${waypoints}">
                     <p>
                         Latitude: <span th:text="${waypoint.latitude}"></span>
                         Longitude: <span th:text="${waypoint.longitude}"></span>
