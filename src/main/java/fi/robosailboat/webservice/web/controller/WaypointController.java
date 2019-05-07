@@ -20,14 +20,14 @@ public class WaypointController {
                             @RequestParam(value = "latitude", required = true) double latitude,
                             @RequestParam(value = "longitude", required = true) double longitude,
                             @RequestParam(value = "radius", required = true) double radius) {
-        WayPointService.addWaypoint(index, new WaypointData(atomicInteger.getAndIncrement(), latitude, longitude, radius));
+        WayPointService.addWaypoint(index, new WaypointData(latitude, longitude, radius));
     }
 
     @RequestMapping(value = "/addWaypointLastInList", method = RequestMethod.POST)
     public void addWaypointLastInList(@RequestParam(value = "latitude", required = true) double latitude,
                                       @RequestParam(value = "longitude", required = true) double longitude,
                                       @RequestParam(value = "radius", required = true) double radius) {
-        WayPointService.addWaypointLastInList(new WaypointData(atomicInteger.getAndIncrement(), latitude, longitude, radius));
+        WayPointService.addWaypointLastInList(new WaypointData(latitude, longitude, radius));
     }
 
     @RequestMapping(value = "/removeWaypoint", method = RequestMethod.POST)

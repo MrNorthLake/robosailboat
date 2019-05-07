@@ -6,13 +6,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 public class WaypointData {
-    private int index;
     private double latitude;
     private double longitude;
     private double radius;
 
-    public WaypointData(int index, double latitude, double longitude, double radius){
-        this.index = index;
+    public WaypointData(double latitude, double longitude, double radius){
         this.latitude = latitude;
         this.longitude = longitude;
         this.radius = radius;
