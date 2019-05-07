@@ -17,10 +17,11 @@ public class CalculationsTest {
     @Before
     public void init() {
         calculations = new Calculations();
-        SensorData sensorData = new SensorData(60.105381, 19.944503, 180, 4, 150);
-        WaypointData waypointData = new WaypointData("1", 60.052229, 19.907767, 15,
-                sensorData.getLatitude(), sensorData.getLongitude(), 15);
+        SensorData sensorData = new SensorData(60.105381, 19.944503, 180, 5, 150);
+        WaypointData waypointData = new WaypointData(1, 60.052229, 19.907767, 15);
         WeatherDTO weatherDTO = new WeatherDTO();
+        weatherDTO.setDirection(100);
+        weatherDTO.setSpeed(5);
         calculations.setData(sensorData, waypointData, weatherDTO);
     }
 
@@ -28,8 +29,20 @@ public class CalculationsTest {
     public void getNextCommand() {
         Command next = calculations.getNextCommand();
 
-        assertEquals(next.getR(), "068");
-        assertEquals(next.getS(), "060");
+        assertEquals("067", next.getR());
+        assertEquals("087", next.getS());
+
+        SensorData sensorData = new SensorData(60.104568, 19.945619, 0, 5, 30);
+        WaypointData waypointData = new WaypointData(2, 60.104718, 19.946027, 15);
+        WeatherDTO weatherDTO = new WeatherDTO();
+        weatherDTO.setDirection(30);
+        weatherDTO.setSpeed(5);
+        calculations.setData(sensorData, waypointData, weatherDTO);
+
+        next = calculations.getNextCommand();
+
+        assertEquals("060", next.getR());
+        assertEquals("094", next.getS());
     }
 
     @Test
@@ -44,13 +57,17 @@ public class CalculationsTest {
         double result = calculations.calculateTrueWindSpeed(180, 5, 5, 150);
 
         assertEquals(-0, result, 0.5);
+
+        result = calculations.calculateTrueWindSpeed(0, 5, 5, 30);
+
+        assertEquals(0.8, result, 0.5);
     }
 
     @Test
     public void calculateTargetCourse() {
         double result = calculations.calculateTargetCourse();
 
-        assertEquals(195, result, 0.9);
+        assertEquals(197, result, 0.5);
     }
 
     @Test
