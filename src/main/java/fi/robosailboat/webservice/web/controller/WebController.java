@@ -3,6 +3,7 @@ package fi.robosailboat.webservice.web.controller;
 import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
 import fi.robosailboat.webservice.robosailboatLib.repository.LoggingRepository;
 import fi.robosailboat.webservice.weatherStationCommunication.SimpleMqttCallback;
+import fi.robosailboat.webservice.weatherStationCommunication.WeatherDTO;
 import fi.robosailboat.webservice.web.service.WriteDataToCSV;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,8 +29,15 @@ public class WebController {
     @RequestMapping("/")
     public String home(Model model) {
         SensorData latestData = loggingRepository.findTopByOrderByCreatedDesc();
-        model.addAttribute("windDirection", SimpleMqttCallback.getLatestWeather().getDirection());
-        model.addAttribute("windSpeed", SimpleMqttCallback.getLatestWeather().getSpeed());
+        WeatherDTO weatherData = SimpleMqttCallback.getLatestWeather();
+        if (weatherData != null) {
+            model.addAttribute("windDirection", weatherData.getDirection());
+            model.addAttribute("windSpeed", weatherData.getSpeed());
+        } else {
+            model.addAttribute("windDirection", -1);
+            model.addAttribute("windSpeed", -1);
+        }
+
         model.addAttribute("heading", latestData.getCompassHeading());
         model.addAttribute("position", latestData.getLatitude()+", "+latestData.getLongitude());
         return "index";

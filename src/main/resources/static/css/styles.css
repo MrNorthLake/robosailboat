@@ -8,7 +8,7 @@ body {
 }
 
 .wrapper {
-  margin-bottom: 10%;
+  margin-bottom: 5%;
   display: flex;  
   flex-flow: row wrap;
   text-align: center;

@@ -10,10 +10,13 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Controller
-@RequestMapping("/waypoint")
+@RequestMapping("/")
 public class WaypointController {
 
-    private AtomicInteger atomicInteger = new AtomicInteger(1);
+    @RequestMapping("/waypoint")
+    public String waypoint() {
+        return "waypoint";
+    }
 
     @RequestMapping(value = "/addWaypoint", method = RequestMethod.POST)
     public void addWaypoint(@RequestParam(value = "index", required = true) int index,
