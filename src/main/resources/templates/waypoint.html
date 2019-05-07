@@ -13,14 +13,27 @@
     <article class="main-log">
         <h2>Waypoints</h2>
         <section>
-            Here be waypoints
+            <ul class="waypoint-list">
+                <li th:each="waypoint : ${waypoints}">
+                    <p>
+                        Latitude: <span th:text="${waypoint.latitude}"></span>
+                        Longitude: <span th:text="${waypoint.longitude}"></span>
+                        Radius: <span th:text="${waypoint.radius}"></span>
+                    </p>
+                </li>
+            </ul>
         </section>
     </article>
     <aside class="aside aside-1">
-        Aside-1
+        <h2>Add waypoint</h2>
+        <form action="#" th:action="@{/addWaypointLastInList}">
+            <p>Lat: <input name="latitude" type="number" /></p>
+            <p>Lon: <input name="longitude" type="number" /></p>
+            <p>Rad: <input name="radius" type="number" /></p>
+            <button type="submit">Add</button>
+        </form>
     </aside>
     <aside class="aside aside-2">
-        Aside-2
     </aside>
 </div>
 </body>

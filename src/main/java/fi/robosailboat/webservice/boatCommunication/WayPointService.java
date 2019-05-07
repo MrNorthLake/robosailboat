@@ -11,6 +11,10 @@ public class WayPointService {
 
     private static List<WaypointData> WAYPOINT_LIST = new ArrayList<>();
 
+    public WayPointService() {
+        initWaypoints();
+    }
+
     public static List<WaypointData> getWaypointList(){
         return WAYPOINT_LIST;
     }

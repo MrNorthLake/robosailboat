@@ -4,6 +4,7 @@ import fi.robosailboat.webservice.boatCommunication.WayPointService;
 import fi.robosailboat.webservice.boatCommunication.dto.WaypointData;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,7 +15,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class WaypointController {
 
     @RequestMapping("/waypoint")
-    public String waypoint() {
+    public String waypoint(Model model) {
+        model.addAttribute("waypoints", WayPointService.getWaypointList());
+
         return "waypoint";
     }
 
@@ -26,11 +29,14 @@ public class WaypointController {
         WayPointService.addWaypoint(index, new WaypointData(latitude, longitude, radius));
     }
 
-    @RequestMapping(value = "/addWaypointLastInList", method = RequestMethod.POST)
-    public void addWaypointLastInList(@RequestParam(value = "latitude", required = true) double latitude,
+    @RequestMapping(value = "/addWaypointLastInList", method = RequestMethod.GET)
+    public ModelAndView addWaypointLastInList(@RequestParam(value = "latitude", required = true) double latitude,
                                       @RequestParam(value = "longitude", required = true) double longitude,
                                       @RequestParam(value = "radius", required = true) double radius) {
         WayPointService.addWaypointLastInList(new WaypointData(latitude, longitude, radius));
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("redirect:/waypoint");
+        return modelAndView;
     }
 
     @RequestMapping(value = "/removeWaypoint", method = RequestMethod.POST)
