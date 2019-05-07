@@ -36,7 +36,7 @@ public class VesselDataTransferController {
                 + " | Compass direction: " + latestData.getDirection());
 
         /* more testing */
-        WaypointData waypointData = new WaypointData(1, 60.052229, 19.907767, 15);
+        WaypointData waypointData = new WaypointData(60.052229, 19.907767, 15);
 
         calculations.setData(latestData, waypointData, SimpleMqttCallback.getLatestWeather());
 

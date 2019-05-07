@@ -24,7 +24,7 @@ public class WayPointService {
     }
 
     public static void initWaypoints(){
-        WAYPOINT_LIST.add(new WaypointData(111,222,333,444));
+        WAYPOINT_LIST.add(new WaypointData(111,222,333));
     }
 
 
