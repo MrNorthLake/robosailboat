@@ -37,7 +37,11 @@
         <h2>Update waypoint</h2>
         <form action="#" th:action="@{/updateWaypoint}">
             <p>Pos: <input name="index" type="number" /></p>
-            <p>Act: <input name="action" type="number" /></p>
+            <p>Act: <select class="select" name="action">
+                <option value="1">Latitude</option>
+                <option value="2">Longitude</option>
+                <option value="3">Radius</option>
+            </select></p>
             <p>Val: <input name="value" type="number" /></p>
             <button type="submit">Update</button>
         </form>
