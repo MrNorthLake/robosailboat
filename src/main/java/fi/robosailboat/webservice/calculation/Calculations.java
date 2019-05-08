@@ -60,6 +60,8 @@ public class Calculations {
 
     private double rudderCommandAngle; // degrees [-30, +30[ in vessel reference frame (clockwise from top view)
     private double sailCommandAngle; // degrees
+    private double defaultRudderAngle = 90;
+    private double defaultSailAngle = 90;
 
     public Calculations() {
         LOG.info("Initialising values...");
@@ -131,6 +133,14 @@ public class Calculations {
         rudderCommandAngle += 90;
         sailCommandAngle = calculateSailAngle();
         LOG.info("Got rudder angle: " + rudderCommandAngle + " and sail angle: " + sailCommandAngle);
+
+        //error handling
+        if ((rudderCommandAngle-90) == NO_COMMAND) {
+            rudderCommandAngle = defaultRudderAngle;
+        }
+        if (sailCommandAngle == NO_COMMAND) {
+            sailCommandAngle = defaultSailAngle;
+        }
 
         return new Command(rudderCommandAngle, sailCommandAngle);
     }
