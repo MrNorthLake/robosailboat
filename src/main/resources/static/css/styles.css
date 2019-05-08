@@ -8,7 +8,7 @@ body {
 }
 
 .wrapper {
-  margin-bottom: 10%;
+  margin-bottom: 5%;
   display: flex;  
   flex-flow: row wrap;
   text-align: center;
@@ -26,6 +26,20 @@ body {
 .log-list {
     list-style-type: none;
     text-align: left;
+}
+
+.waypoint-list {
+  list-style-type: decimal;
+  text-align: center;
+  border-top: 1px solid black;
+}
+
+.waypoint-li {
+  border-bottom: 1px solid black;
+}
+
+.select {
+  width: 160px;
 }
 
 .time {

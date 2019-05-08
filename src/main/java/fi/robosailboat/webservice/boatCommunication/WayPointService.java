@@ -11,6 +11,10 @@ public class WayPointService {
 
     private static List<WaypointData> WAYPOINT_LIST = new ArrayList<>();
 
+    public WayPointService() {
+        initWaypoints();
+    }
+
     public static List<WaypointData> getWaypointList(){
         return WAYPOINT_LIST;
     }
@@ -46,5 +50,9 @@ public class WayPointService {
                  WAYPOINT_LIST.get(index).setRadius(value);
                  break;
          }
+    }
+
+    public static void clearWaypoints() {
+        WAYPOINT_LIST.clear();
     }
 }
