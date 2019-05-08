@@ -51,4 +51,8 @@ public class WayPointService {
                  break;
          }
     }
+
+    public static void clearWaypoints() {
+        WAYPOINT_LIST.clear();
+    }
 }

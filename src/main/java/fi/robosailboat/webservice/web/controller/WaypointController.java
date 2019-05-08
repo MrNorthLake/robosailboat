@@ -39,16 +39,30 @@ public class WaypointController {
         return modelAndView;
     }
 
-    @RequestMapping(value = "/removeWaypoint", method = RequestMethod.POST)
-    public void removeWaypoint(@RequestParam(value = "index", required = true) int index) {
+    @RequestMapping(value = "/removeWaypoint", method = RequestMethod.GET)
+    public ModelAndView removeWaypoint(@RequestParam(value = "index", required = true) int index) {
         WayPointService.removeWaypoint(index);
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("redirect:/waypoint");
+        return modelAndView;
     }
 
-    @RequestMapping(value = "/updateWaypoint", method = RequestMethod.POST)
-    public void update(@RequestParam(value = "index", required = true) int index,
+    @RequestMapping(value = "/updateWaypoint", method = RequestMethod.GET)
+    public ModelAndView update(@RequestParam(value = "index", required = true) int index,
                        @RequestParam(value = "action", required = true) int action,
                        @RequestParam(value = "value", required = true) double value) {
         WayPointService.updateWaypoint(index, action, value);
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("redirect:/waypoint");
+        return modelAndView;
+    }
+
+    @RequestMapping(value = "/clearWaypoints", method = RequestMethod.GET)
+    public ModelAndView clearWaypoints() {
+        WayPointService.clearWaypoints();
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("redirect:/waypoint");
+        return modelAndView;
     }
 
     @RequestMapping(value ="/getWaypointList", method = RequestMethod.GET)

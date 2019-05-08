@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Waypoint</title>
+    <title>Waypoints</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -22,6 +22,7 @@
                     </p>
                 </li>
             </ul>
+            <p th:if="${#lists.isEmpty(waypoints)}">No waypoints.</p>
         </section>
     </article>
     <aside class="aside aside-1">
@@ -31,6 +32,25 @@
             <p>Lon: <input name="longitude" type="number" /></p>
             <p>Rad: <input name="radius" type="number" /></p>
             <button type="submit">Add</button>
+        </form>
+
+        <h2>Update waypoint</h2>
+        <form action="#" th:action="@{/updateWaypoint}">
+            <p>Pos: <input name="index" type="number" /></p>
+            <p>Act: <input name="action" type="number" /></p>
+            <p>Val: <input name="value" type="number" /></p>
+            <button type="submit">Update</button>
+        </form>
+
+        <h2>Remove waypoint</h2>
+        <form action="#" th:action="@{/removeWaypoint}">
+            <p>Pos: <input name="index" type="number" /></p>
+            <button type="submit">Remove</button>
+        </form>
+
+        <h2>Clear waypoints</h2>
+        <form action="#" th:action="@{/clearWaypoints}">
+            <button type="submit">Clear</button>
         </form>
     </aside>
     <aside class="aside aside-2">
