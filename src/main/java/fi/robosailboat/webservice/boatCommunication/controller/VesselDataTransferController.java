@@ -35,10 +35,7 @@ public class VesselDataTransferController {
         LOG.info("Latest sensorData. Gps latitud: " + latestData.getLatitude() + " | Gps longitud: " + latestData.getLongitude()
                 + " | Compass direction: " + latestData.getDirection());
 
-        /* more testing */
-        WaypointData waypointData = new WaypointData(60.052229, 19.907767, 15);
-
-        calculations.setData(latestData, waypointData, SimpleMqttCallback.getLatestWeather());
+        calculations.setData(latestData, SimpleMqttCallback.getLatestWeather());
 
         /*Random respons command with values between 60 and 120*/
         /*Random rnd = new Random();

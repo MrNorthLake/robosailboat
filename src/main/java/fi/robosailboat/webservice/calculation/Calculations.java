@@ -1,5 +1,6 @@
 package fi.robosailboat.webservice.calculation;
 
+import fi.robosailboat.webservice.boatCommunication.WayPointService;
 import fi.robosailboat.webservice.boatCommunication.dto.Command;
 import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
 import fi.robosailboat.webservice.boatCommunication.dto.WaypointData;
@@ -30,12 +31,10 @@ public class Calculations {
     private double minSailAngle = 60; // degrees
     private double apparentWindDirection; // degrees [0, 360[ in North-East reference frame (clockwise)
 
-    private double prevWaypointLat;
-    private double prevWaypointLon;
-    private double prevWaypointRadius; // m
-    private double nextWaypointLat;
-    private double nextWaypointLon;
-    private double nextWaypointRadius; // m
+    private List<WaypointData> waypointList;
+    private int waypointCurrentIndex;
+    private WaypointData nextWaypoint;
+    private WaypointData prevWaypoint;
     private double vesselLat;
     private double vesselLon;
     private double trueWindSpeed; // m/s
@@ -65,6 +64,8 @@ public class Calculations {
     public Calculations() {
         LOG.info("Initialising values...");
         init();
+        waypointList = WayPointService.getWaypointList();
+        waypointCurrentIndex = 0;
 
         // Default values (from sailingrobots)
         tackDirection = 1;
@@ -82,12 +83,8 @@ public class Calculations {
         vesselHeading = DATA_OUT_OF_RANGE;
         vesselLat = DATA_OUT_OF_RANGE;
         vesselLon = DATA_OUT_OF_RANGE;
-        prevWaypointLat = DATA_OUT_OF_RANGE;
-        prevWaypointLon = DATA_OUT_OF_RANGE;
-        prevWaypointRadius = DATA_OUT_OF_RANGE;
-        nextWaypointLat = DATA_OUT_OF_RANGE;
-        nextWaypointLon = DATA_OUT_OF_RANGE;
-        nextWaypointRadius = DATA_OUT_OF_RANGE;
+        nextWaypoint = null;
+        prevWaypoint = null;
         trueWindSpeed = DATA_OUT_OF_RANGE;
         trueWindDirection = DATA_OUT_OF_RANGE;
         apparentWindDirection = DATA_OUT_OF_RANGE;
@@ -95,18 +92,19 @@ public class Calculations {
     }
 
     /* Must set values for all calculations to work. */
-    public void setData(SensorData sensorData, WaypointData waypointData, WeatherDTO windData) {
+    public void setData(SensorData sensorData, WeatherDTO windData) {
         LOG.info("Setting data...");
         vesselLat = sensorData.getLatitude();
         vesselLon = sensorData.getLongitude();
         vesselHeading = sensorData.getCompassHeading();
         double gpsSpeed = sensorData.getGpsSpeed();
 
-        nextWaypointLat = waypointData.getLatitude();
-        nextWaypointLon = waypointData.getLongitude();
-        nextWaypointRadius = waypointData.getRadius();
-        prevWaypointLat = vesselLat;
-        prevWaypointLon = vesselLon;
+        nextWaypoint = waypointList.get(waypointCurrentIndex);
+        if (waypointCurrentIndex > 0) {
+            prevWaypoint = waypointList.get(waypointCurrentIndex-1);
+        } else {
+            prevWaypoint = new WaypointData(vesselLat, vesselLon, 15);
+        }
 
         double windDir = windData.getDirection();
         double windSpeed = windData.getSpeed();
@@ -224,6 +222,11 @@ public class Calculations {
     public double calculateAngleOfDesiredTrajectory() {
         int earthRadius = 6371000; //meters
 
+        double prevWaypointLat = prevWaypoint.getLatitude();
+        double prevWaypointLon = prevWaypoint.getLongitude();
+        double nextWaypointLat = nextWaypoint.getLatitude();
+        double nextWaypointLon = nextWaypoint.getLongitude();
+
         double prevWPCoord[] = {
             earthRadius * Math.cos(Math.toRadians(prevWaypointLat)) * Math.cos(Math.toRadians(prevWaypointLon)),
             earthRadius * Math.cos(Math.toRadians(prevWaypointLat)) * Math.sin(Math.toRadians(prevWaypointLon)),
@@ -260,15 +263,12 @@ public class Calculations {
     /* Calculates the course to steer by using the line follow algorithm. Reused code from sailingrobots. */
     public double calculateTargetCourse() {
 
-        if(prevWaypointLat == DATA_OUT_OF_RANGE || prevWaypointLon == DATA_OUT_OF_RANGE) {
-            prevWaypointLat = vesselLat;
-            prevWaypointLon = vesselLon;
-            prevWaypointRadius = 30.0;
+        if(prevWaypoint == null) {
+            prevWaypoint = new WaypointData(vesselLat, vesselLon, 15);
 
         }
         if (vesselLat == DATA_OUT_OF_RANGE || vesselLon == DATA_OUT_OF_RANGE || trueWindSpeed == DATA_OUT_OF_RANGE ||
-            trueWindDirection == DATA_OUT_OF_RANGE || nextWaypointLat == DATA_OUT_OF_RANGE || nextWaypointLon == DATA_OUT_OF_RANGE ||
-            nextWaypointRadius == DATA_OUT_OF_RANGE) {
+            trueWindDirection == DATA_OUT_OF_RANGE || nextWaypoint == null) {
             return DATA_OUT_OF_RANGE;
         } else {
             LOG.info("In calculateTargetCourse()");
@@ -323,14 +323,17 @@ public class Calculations {
 
     /* If boat passed waypoint or enters it, set new line from boat to next waypoint. Reused code from sailingrobots. */
     public void checkIfEnteredWaypoint() {
-        double distanceAfterWaypoint = calculateWaypointsOrthogonalLine(nextWaypointLat, nextWaypointLon, prevWaypointLat, prevWaypointLon,
-                vesselLat, vesselLon);
-        double distanceToWaypoint = distanceBetween(vesselLat, vesselLon, nextWaypointLat, nextWaypointLon);
+        double distanceAfterWaypoint = calculateWaypointsOrthogonalLine(nextWaypoint.getLatitude(), nextWaypoint.getLongitude(),
+                prevWaypoint.getLatitude(), prevWaypoint.getLongitude(), vesselLat, vesselLon);
+        double distanceToWaypoint = distanceBetween(vesselLat, vesselLon, nextWaypoint.getLatitude(), nextWaypoint.getLongitude());
 
-        if (distanceAfterWaypoint > 0 || distanceToWaypoint < nextWaypointRadius) {
+        if (distanceAfterWaypoint > 0 || distanceToWaypoint < nextWaypoint.getRadius()) {
             LOG.info("Setting previous waypoint to boat position...");
-            prevWaypointLon = vesselLon;
-            prevWaypointLat = vesselLat;
+            prevWaypoint = new WaypointData(vesselLat, vesselLon, 15);
+            waypointCurrentIndex++;
+            if (waypointCurrentIndex == waypointList.size()) {
+                waypointCurrentIndex = 0;
+            }
         }
     }
 
@@ -501,6 +504,11 @@ public class Calculations {
     /* Calculates signed distance to line. Reused code from sailingrobots. */
     private double calculateSignedDistanceToLine() {
         int earthRadius = 6371000; //meters
+
+        double prevWaypointLat = prevWaypoint.getLatitude();
+        double prevWaypointLon = prevWaypoint.getLongitude();
+        double nextWaypointLat = nextWaypoint.getLatitude();
+        double nextWaypointLon = nextWaypoint.getLongitude();
 
         //a
         double prevWPCoord[] = {

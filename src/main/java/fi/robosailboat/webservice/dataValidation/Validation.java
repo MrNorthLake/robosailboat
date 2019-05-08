@@ -9,7 +9,6 @@ public class Validation {
 
     private SensorData latestData;
     private SensorData expectedData;
-    private WaypointData waypointData = new WaypointData( 0, 0, 0);
     int maxDistanceDiff; // Max distance difference between latest and expected in meters
     double maxDirectionDiff; // Max difference in direction
 
@@ -24,7 +23,7 @@ public class Validation {
     public void validate(){
 
         Calculations calculations = new Calculations();
-        calculations.setData(latestData, waypointData, SimpleMqttCallback.getLatestWeather());
+        calculations.setData(latestData, SimpleMqttCallback.getLatestWeather());
         double distanceDiff = calculations.distanceBetween(latestData.getLatitude(), latestData.getLongitude(),
                 expectedData.getLatitude(), expectedData.getLongitude());
 
