@@ -33,7 +33,11 @@ public class WaypointController {
     public ModelAndView addWaypointLastInList(@RequestParam(value = "latitude", required = true) double latitude,
                                       @RequestParam(value = "longitude", required = true) double longitude,
                                       @RequestParam(value = "radius", required = true) double radius) {
-        WayPointService.addWaypointLastInList(new WaypointData(latitude, longitude, radius));
+        try {
+            WayPointService.addWaypointLastInList(new WaypointData(latitude, longitude, radius));
+        } catch(Exception e) {
+            System.out.println("Error inserting: " + e.getMessage());
+        }
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("redirect:/waypoint");
         return modelAndView;
@@ -41,7 +45,11 @@ public class WaypointController {
 
     @RequestMapping(value = "/removeWaypoint", method = RequestMethod.GET)
     public ModelAndView removeWaypoint(@RequestParam(value = "index", required = true) int index) {
-        WayPointService.removeWaypoint(index);
+        try {
+            WayPointService.removeWaypoint(index);
+        } catch(Exception e) {
+            System.out.println("Error removing: " + e.getMessage());
+        }
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("redirect:/waypoint");
         return modelAndView;
@@ -51,7 +59,11 @@ public class WaypointController {
     public ModelAndView update(@RequestParam(value = "index", required = true) int index,
                        @RequestParam(value = "action", required = true) int action,
                        @RequestParam(value = "value", required = true) double value) {
-        WayPointService.updateWaypoint(index, action, value);
+        try {
+            WayPointService.updateWaypoint(index, action, value);
+        } catch(Exception e) {
+            System.out.println("Error updating: " + e.getMessage());
+        }
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("redirect:/waypoint");
         return modelAndView;
