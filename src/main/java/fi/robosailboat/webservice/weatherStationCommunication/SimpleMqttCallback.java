@@ -16,7 +16,7 @@ public class SimpleMqttCallback implements MqttCallback {
 
     public SimpleMqttCallback() {
         try {
-            this.client = new MqttClient(CONNECTION_URI, "test");
+            this.client = new MqttClient(CONNECTION_URI, MqttAsyncClient.generateClientId());
             this.client.setCallback(this);
             this.client.connect(initOptions());
             this.client.subscribe(SUBSCRIPTION);
@@ -56,7 +56,6 @@ public class SimpleMqttCallback implements MqttCallback {
     }
 
     public static WeatherDTO getLatestWeather() {
-        log.info("windDirection: " + latestWeather);
         return latestWeather;
     }
 }
