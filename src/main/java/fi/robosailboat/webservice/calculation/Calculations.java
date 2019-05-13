@@ -35,6 +35,8 @@ public class Calculations {
     private int waypointCurrentIndex;
     private WaypointData nextWaypoint;
     private WaypointData prevWaypoint;
+    private double defaultRadius = 5;
+
     private double vesselLat;
     private double vesselLon;
     private double trueWindSpeed; // m/s
@@ -105,7 +107,7 @@ public class Calculations {
         if (waypointCurrentIndex > 0) {
             prevWaypoint = waypointList.get(waypointCurrentIndex-1);
         } else {
-            prevWaypoint = new WaypointData(vesselLat, vesselLon, 15);
+            prevWaypoint = new WaypointData(vesselLat, vesselLon, defaultRadius);
         }
 
         double windDir = windData.getDirection();
@@ -274,7 +276,7 @@ public class Calculations {
     public double calculateTargetCourse() {
 
         if(prevWaypoint == null) {
-            prevWaypoint = new WaypointData(vesselLat, vesselLon, 15);
+            prevWaypoint = new WaypointData(vesselLat, vesselLon, defaultRadius);
 
         }
         if (vesselLat == DATA_OUT_OF_RANGE || vesselLon == DATA_OUT_OF_RANGE || trueWindSpeed == DATA_OUT_OF_RANGE ||
@@ -340,7 +342,7 @@ public class Calculations {
 
             if (distanceAfterWaypoint > 0 || distanceToWaypoint < nextWaypoint.getRadius()) {
                 LOG.info("Setting previous waypoint to boat position...");
-                prevWaypoint = new WaypointData(vesselLat, vesselLon, 15);
+                prevWaypoint = new WaypointData(vesselLat, vesselLon, defaultRadius);
                 waypointCurrentIndex++;
                 if (waypointCurrentIndex == waypointList.size()) {
                     waypointCurrentIndex = 0;
