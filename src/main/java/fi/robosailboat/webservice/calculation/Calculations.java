@@ -333,16 +333,18 @@ public class Calculations {
 
     /* If boat passed waypoint or enters it, set new line from boat to next waypoint. Reused code from sailingrobots. */
     public void checkIfEnteredWaypoint() {
-        double distanceAfterWaypoint = calculateWaypointsOrthogonalLine(nextWaypoint.getLatitude(), nextWaypoint.getLongitude(),
-                prevWaypoint.getLatitude(), prevWaypoint.getLongitude(), vesselLat, vesselLon);
-        double distanceToWaypoint = distanceBetween(vesselLat, vesselLon, nextWaypoint.getLatitude(), nextWaypoint.getLongitude());
+        if (nextWaypoint != null && prevWaypoint != null) {
+            double distanceAfterWaypoint = calculateWaypointsOrthogonalLine(nextWaypoint.getLatitude(), nextWaypoint.getLongitude(),
+                    prevWaypoint.getLatitude(), prevWaypoint.getLongitude(), vesselLat, vesselLon);
+            double distanceToWaypoint = distanceBetween(vesselLat, vesselLon, nextWaypoint.getLatitude(), nextWaypoint.getLongitude());
 
-        if (distanceAfterWaypoint > 0 || distanceToWaypoint < nextWaypoint.getRadius()) {
-            LOG.info("Setting previous waypoint to boat position...");
-            prevWaypoint = new WaypointData(vesselLat, vesselLon, 15);
-            waypointCurrentIndex++;
-            if (waypointCurrentIndex == waypointList.size()) {
-                waypointCurrentIndex = 0;
+            if (distanceAfterWaypoint > 0 || distanceToWaypoint < nextWaypoint.getRadius()) {
+                LOG.info("Setting previous waypoint to boat position...");
+                prevWaypoint = new WaypointData(vesselLat, vesselLon, 15);
+                waypointCurrentIndex++;
+                if (waypointCurrentIndex == waypointList.size()) {
+                    waypointCurrentIndex = 0;
+                }
             }
         }
     }
