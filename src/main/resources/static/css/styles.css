@@ -42,6 +42,11 @@ body {
   width: 160px;
 }
 
+.test-form {
+  width: 75%;
+  text-align: right;
+}
+
 .time {
     font-weight: bold;
 }
