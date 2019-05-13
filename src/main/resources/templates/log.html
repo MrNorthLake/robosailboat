@@ -25,16 +25,16 @@
       <aside class="aside aside-1">
         <h2>Search</h2>
         <form action="#" th:action="@{/log}" th:object="${search}">
-          <p>Fr: <input name="from" type="datetime-local" /></p>
-          <p>To: <input name="to" type="datetime-local" /></p>
+          <p>Fr: <input name="from" type="datetime-local" step="1" /></p>
+          <p>To: <input name="to" type="datetime-local" step="1" /></p>
           <button type="submit">Search</button>
         </form>
       </aside>
       <aside class="aside aside-2">
         <h2>Download Log File </h2>
         <form action="#" th:action="@{/log/download/Log.csv}" th:object="${download}">
-          <p>Fr: <input name="from" type="datetime-local" /></p>
-          <p>To: <input name="to" type="datetime-local" /></p>
+          <p>Fr: <input name="from" type="datetime-local" step="1" /></p>
+          <p>To: <input name="to" type="datetime-local" step="1" /></p>
           <button type="submit">Download Logs.csv</button>
         </form>
       </aside>

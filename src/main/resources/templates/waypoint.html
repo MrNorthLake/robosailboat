@@ -28,8 +28,8 @@
     <aside class="aside aside-1">
         <h2>Add waypoint</h2>
         <form action="#" th:action="@{/addWaypointLastInList}">
-            <p>Lat: <input name="latitude" type="number" /></p>
-            <p>Lon: <input name="longitude" type="number" /></p>
+            <p>Lat: <input name="latitude" type="number" step="0.000001" /></p>
+            <p>Lon: <input name="longitude" type="number" step="0.000001" /></p>
             <p>Rad: <input name="radius" type="number" /></p>
             <button type="submit">Add</button>
         </form>
@@ -42,7 +42,7 @@
                 <option value="2">Longitude</option>
                 <option value="3">Radius</option>
             </select></p>
-            <p>Val: <input name="value" type="number" /></p>
+            <p>Val: <input name="value" type="number" step="0.000001" /></p>
             <button type="submit">Update</button>
         </form>
 
