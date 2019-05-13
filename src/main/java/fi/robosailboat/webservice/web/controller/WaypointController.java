@@ -93,19 +93,17 @@ public class WaypointController {
     public ModelAndView testCalculations(
             @RequestParam(value = "latitude", required = true) double latitude,
             @RequestParam(value = "longitude", required = true) double longitude,
-            @RequestParam(value = "direction", required = true) double direction,
             @RequestParam(value = "gpsSpeed", required = true) double gpsSpeed,
             @RequestParam(value = "heading", required = true) double heading,
             @RequestParam(value = "windDirection", required = true) int windDirection,
             @RequestParam(value = "windSpeed", required = true) int windSpeed
     ) {
         calculations = new Calculations();
-        SensorData sensorData = new SensorData(latitude, longitude, direction, gpsSpeed, heading);
+        SensorData sensorData = new SensorData(latitude, longitude, 0, gpsSpeed, heading);
         WeatherDTO weather = new WeatherDTO();
         weather.setDirection(windDirection);
         weather.setSpeed(windSpeed);
         calculations.setData(sensorData, weather);
-        //calculations.getNextCommand();
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("redirect:/waypoint");
