@@ -19,7 +19,7 @@ public class CalculationsTest {
     @Before
     public void init() {
         calculations = new Calculations();
-        SensorData sensorData = new SensorData(60.105381, 19.944503, 180, 4, 150);
+        SensorData sensorData = new SensorData(601053810, 199445030, 180, 4, 150);
         WaypointData waypointData = new WaypointData(60.052229, 19.907767, 15);
         WayPointService.clearWaypoints();
         WayPointService.addWaypointLastInList(waypointData);
@@ -36,7 +36,7 @@ public class CalculationsTest {
         assertEquals("067", next.getR());
         assertEquals("086", next.getS());
 
-        SensorData sensorData = new SensorData(60.104568, 19.945619, 0, 5, 30);
+        SensorData sensorData = new SensorData(601045680, 199456190, 0, 5, 30);
         WaypointData waypointData = new WaypointData(60.104718, 19.946027, 15);
         WayPointService.clearWaypoints();
         WayPointService.addWaypointLastInList(waypointData);
