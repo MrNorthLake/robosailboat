@@ -58,6 +58,18 @@
         </form>
     </aside>
     <aside class="aside aside-2">
+        <h2>Test calculations</h2>
+        <form action="#" th:action="@{/testCalculations}">
+            <p>Lat: <input name="latitude" type="number" step="0.000001" /></p>
+            <p>Lon: <input name="longitude" type="number" step="0.000001" /></p>
+            <p>Dir: <input name="direction" type="number" step="0.000001" /></p>
+            <p>Gps: <input name="gpsSpeed" type="number" step="0.000001" /></p>
+            <p>Hea: <input name="heading" type="number" step="0.000001" /></p>
+            <p>WDr: <input name="windDirection" type="number" step="0.000001" /></p>
+            <p>WSp: <input name="windSpeed" type="number" step="0.000001" /></p>
+            <button type="submit">Test</button>
+        </form>
+        <p>Command: <span th:text="${command.R}"></span>, <span th:text="${command.S}"></span></p>
     </aside>
 </div>
 </body>

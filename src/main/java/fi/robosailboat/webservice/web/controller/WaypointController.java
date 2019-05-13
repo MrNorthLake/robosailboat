@@ -2,6 +2,10 @@ package fi.robosailboat.webservice.web.controller;
 
 import fi.robosailboat.webservice.boatCommunication.WayPointService;
 import fi.robosailboat.webservice.boatCommunication.dto.WaypointData;
+import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
+import fi.robosailboat.webservice.boatCommunication.dto.Command;
+import fi.robosailboat.webservice.calculation.Calculations;
+import fi.robosailboat.webservice.weatherStationCommunication.WeatherDTO;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.ModelAndView;
@@ -14,9 +18,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequestMapping("/")
 public class WaypointController {
 
+    Calculations calculations = new Calculations();
+
     @RequestMapping("/waypoint")
     public String waypoint(Model model) {
         model.addAttribute("waypoints", WayPointService.getWaypointList());
+        model.addAttribute("command", calculations.getNextCommand());
 
         return "waypoint";
     }
@@ -82,4 +89,26 @@ public class WaypointController {
         model.addAttribute("waypoints",WayPointService.getWaypointList());
     }
 
+    @RequestMapping(value = "/testCalculations", method = RequestMethod.GET)
+    public ModelAndView testCalculations(
+            @RequestParam(value = "latitude", required = true) double latitude,
+            @RequestParam(value = "longitude", required = true) double longitude,
+            @RequestParam(value = "direction", required = true) double direction,
+            @RequestParam(value = "gpsSpeed", required = true) double gpsSpeed,
+            @RequestParam(value = "heading", required = true) double heading,
+            @RequestParam(value = "windDirection", required = true) int windDirection,
+            @RequestParam(value = "windSpeed", required = true) int windSpeed
+    ) {
+        calculations = new Calculations();
+        SensorData sensorData = new SensorData(latitude, longitude, direction, gpsSpeed, heading);
+        WeatherDTO weather = new WeatherDTO();
+        weather.setDirection(windDirection);
+        weather.setSpeed(windSpeed);
+        calculations.setData(sensorData, weather);
+        //calculations.getNextCommand();
+
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("redirect:/waypoint");
+        return modelAndView;
+    }
 }
