@@ -353,6 +353,7 @@ public class Calculations {
 
     /*Return distance in meters between two Gps points. Reused code from sailingrobot github*/
     public double distanceBetween(double lat1, double lon1, double lat2, double lon2){
+        LOG.info("Calculating distance between " + lat1 + ", " + lon1 + " and " + lat2 + ", " + lon2);
 
         final double radiusOfEarth = 6371.0; //km
 

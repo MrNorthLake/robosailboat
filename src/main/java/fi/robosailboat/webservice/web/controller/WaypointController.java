@@ -99,7 +99,7 @@ public class WaypointController {
             @RequestParam(value = "windSpeed", required = true) int windSpeed
     ) {
         calculations = new Calculations();
-        SensorData sensorData = new SensorData(latitude, longitude, 0, gpsSpeed, heading);
+        SensorData sensorData = new SensorData(latitude*10000000, longitude*10000000, 0, gpsSpeed, heading);
         WeatherDTO weather = new WeatherDTO();
         weather.setDirection(windDirection);
         weather.setSpeed(windSpeed);
