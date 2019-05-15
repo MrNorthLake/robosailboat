@@ -103,6 +103,7 @@ public class Calculations {
         vesselHeading = sensorData.getCompassHeading();
         double gpsSpeed = sensorData.getGpsSpeed();
 
+        LOG.info("Setting next waypoint at index: " + waypointCurrentIndex);
         nextWaypoint = waypointList.get(waypointCurrentIndex);
         if (waypointCurrentIndex > 0) {
             prevWaypoint = waypointList.get(waypointCurrentIndex-1);
