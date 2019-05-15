@@ -98,8 +98,8 @@ public class Calculations {
     /* Must set values for all calculations to work. */
     public void setData(SensorData sensorData, WeatherDTO windData) {
         LOG.info("Setting data...");
-        vesselLat = sensorData.getLatitude();
-        vesselLon = sensorData.getLongitude();
+        vesselLat = sensorData.getLatitude()/10000000;
+        vesselLon = sensorData.getLongitude()/10000000;
         vesselHeading = sensorData.getCompassHeading();
         double gpsSpeed = sensorData.getGpsSpeed();
 

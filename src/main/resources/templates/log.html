@@ -17,7 +17,8 @@
             <li th:each="log : ${logs}">
               <p class="time">Time: <span th:text="${#temporals.format(log.created, 'dd-MM-yyyy HH:mm:ss')}"></span></p>
               <p>Heading: <span th:text="${log.compassHeading}"></span></p>
-              <p>Position: <span th:text="${log.latitude}"></span> <span th:text="${log.longitude}"></span></p>
+              <p>Position: <span th:text="${#numbers.formatDecimal((log.latitude/10000000), 0, 7, 'POINT')}"></span>
+                <span th:text="${#numbers.formatDecimal((log.longitude/10000000), 0, 7, 'POINT')}"></span></p>
             </li>
           </ul>
         </section>

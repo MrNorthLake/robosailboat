@@ -39,7 +39,7 @@ public class WebController {
         }
 
         model.addAttribute("heading", latestData.getCompassHeading());
-        model.addAttribute("position", latestData.getLatitude()+", "+latestData.getLongitude());
+        model.addAttribute("position", (latestData.getLatitude()/10000000)+", "+(latestData.getLongitude()/10000000));
         return "index";
     }
 
@@ -64,7 +64,7 @@ public class WebController {
     @RequestMapping(value="/position", method=RequestMethod.GET)
     public String getPosition(Model model) {
         SensorData latestData = loggingRepository.findTopByOrderByCreatedDesc();
-        model.addAttribute("position", latestData.getLatitude()+", "+latestData.getLongitude());
+        model.addAttribute("position", (latestData.getLatitude()/10000000)+", "+(latestData.getLongitude()/10000000));
         return "index :: #position";
     }
 
