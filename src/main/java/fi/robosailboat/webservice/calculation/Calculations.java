@@ -103,6 +103,7 @@ public class Calculations {
         vesselHeading = sensorData.getCompassHeading();
         double gpsSpeed = sensorData.getGpsSpeed();
 
+        LOG.info("Setting next waypoint at index: " + waypointCurrentIndex);
         nextWaypoint = waypointList.get(waypointCurrentIndex);
         if (waypointCurrentIndex > 0) {
             prevWaypoint = waypointList.get(waypointCurrentIndex-1);
@@ -124,6 +125,7 @@ public class Calculations {
         LOG.info("Calculated apparent wind direction: " + apparentWindDirection);
     }
 
+    /* Get next Arduino command for rudder and sail angles. */
     public Command getNextCommand() {
         checkIfEnteredWaypoint();
         desiredHeading = calculateTargetCourse();
@@ -338,6 +340,7 @@ public class Calculations {
         if (nextWaypoint != null && prevWaypoint != null) {
             double distanceAfterWaypoint = calculateWaypointsOrthogonalLine(nextWaypoint.getLatitude(), nextWaypoint.getLongitude(),
                     prevWaypoint.getLatitude(), prevWaypoint.getLongitude(), vesselLat, vesselLon);
+            LOG.info("Distance after waypoint: " + distanceAfterWaypoint);
             double distanceToWaypoint = distanceBetween(vesselLat, vesselLon, nextWaypoint.getLatitude(), nextWaypoint.getLongitude());
 
             if (distanceAfterWaypoint > 0 || distanceToWaypoint < nextWaypoint.getRadius()) {
@@ -353,6 +356,7 @@ public class Calculations {
 
     /*Return distance in meters between two Gps points. Reused code from sailingrobot github*/
     public double distanceBetween(double lat1, double lon1, double lat2, double lon2){
+        LOG.info("Calculating distance between " + lat1 + ", " + lon1 + " and " + lat2 + ", " + lon2);
 
         final double radiusOfEarth = 6371.0; //km
 
