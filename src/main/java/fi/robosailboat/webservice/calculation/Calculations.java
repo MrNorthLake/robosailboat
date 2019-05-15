@@ -125,6 +125,7 @@ public class Calculations {
         LOG.info("Calculated apparent wind direction: " + apparentWindDirection);
     }
 
+    /* Get next Arduino command for rudder and sail angles. */
     public Command getNextCommand() {
         checkIfEnteredWaypoint();
         desiredHeading = calculateTargetCourse();
@@ -339,6 +340,7 @@ public class Calculations {
         if (nextWaypoint != null && prevWaypoint != null) {
             double distanceAfterWaypoint = calculateWaypointsOrthogonalLine(nextWaypoint.getLatitude(), nextWaypoint.getLongitude(),
                     prevWaypoint.getLatitude(), prevWaypoint.getLongitude(), vesselLat, vesselLon);
+            LOG.info("Distance after waypoint: " + distanceAfterWaypoint);
             double distanceToWaypoint = distanceBetween(vesselLat, vesselLon, nextWaypoint.getLatitude(), nextWaypoint.getLongitude());
 
             if (distanceAfterWaypoint > 0 || distanceToWaypoint < nextWaypoint.getRadius()) {
