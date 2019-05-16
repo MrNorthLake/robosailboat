@@ -17,6 +17,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -74,6 +77,19 @@ public class WebController {
         List<SensorData> logs = loggingRepository.findAll();
         Collections.reverse(logs);
         model.addAttribute("logs", logs);
+        ZoneId zone = ZoneId.of("UTC+03:00");
+        List<ZonedDateTime> times = new ArrayList<>();
+
+        for (int i = 0; i < logs.size(); i++) {
+            LocalDateTime logTime = logs.get(i).getCreated();
+            if (logTime != null) {
+                ZonedDateTime zonedTime = logTime.atZone(zone);
+                times.add(zonedTime);
+            } else {
+                times.add(ZonedDateTime.now());
+            }
+        }
+        model.addAttribute("times", times);
 
         if (from != null && to != null && !from.isEmpty() && !to.isEmpty()) {
             System.out.println(from + " -> " + to);
