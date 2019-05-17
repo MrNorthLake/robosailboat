@@ -4,6 +4,8 @@ import com.opencsv.CSVWriter;
 import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
 
 import java.io.PrintWriter;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 
 public class WriteDataToCSV {
@@ -12,7 +14,7 @@ public class WriteDataToCSV {
 
 
     public static void writeDataToCsvUsingStringArray(PrintWriter writer, List<SensorData> dataList) {
-        String[] CSV_HEADER = {"Latitude", "Longitude", "Direction", "Track", "CompassHeading"};
+        String[] CSV_HEADER = {"Timetamp","Latitude", "Longitude", "Direction", "Track", "CompassHeading"};
         try (
                 CSVWriter csvWriter = new CSVWriter(writer,
                         CSVWriter.DEFAULT_SEPARATOR,
@@ -24,6 +26,7 @@ public class WriteDataToCSV {
 
             for (SensorData data : dataList) {
                 dataOut = new String[]{
+                        data.getCreated().atZone(ZoneId.systemDefault()).toString(),
                         String.valueOf(data.getLatitude()),
                         String.valueOf(data.getLongitude()),
                         String.valueOf(data.getDirection()),
