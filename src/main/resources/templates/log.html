@@ -14,8 +14,9 @@
         <h2>History</h2>
         <section>
           <ul class="log-list">
-            <li th:each="log : ${logs}">
-              <p class="time">Time: <span th:text="${#temporals.format(log.created, 'dd-MM-yyyy HH:mm:ss')}"></span></p>
+            <li th:each="log, iter : ${logs}">
+              <p class="time">Time: <span th:text="${#temporals.format(times[iter.index], 'dd-MM-yyyy HH:mm:ss')}"></span>
+              <span style="font-size: 10px" th:text="${times[iter.index].getZone()}"></span></p>
               <p>Heading: <span th:text="${log.compassHeading}"></span></p>
               <p>Position: <span th:text="${#numbers.formatDecimal((log.latitude/10000000), 0, 7, 'POINT')}"></span>
                 <span th:text="${#numbers.formatDecimal((log.longitude/10000000), 0, 7, 'POINT')}"></span></p>
