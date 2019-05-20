@@ -29,6 +29,7 @@ public class CalculationsTest {
         calculations.setData(sensorData, weatherDTO);
     }
 
+    @Ignore
     @Test
     public void getNextCommand() {
         Command next = calculations.getNextCommand();

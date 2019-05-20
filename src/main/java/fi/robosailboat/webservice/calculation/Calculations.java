@@ -133,16 +133,17 @@ public class Calculations {
 
         //figure out the commands
         rudderCommandAngle = calculateRudderAngle();
+        rudderCommandAngle *= -1;
         // +90 degrees for converting to Arduino
         rudderCommandAngle += 90;
         sailCommandAngle = calculateSailAngle();
         LOG.info("Got rudder angle: " + rudderCommandAngle + " and sail angle: " + sailCommandAngle);
 
         //error handling
-        if ((rudderCommandAngle-90) == NO_COMMAND) {
+        if (rudderCommandAngle < 60 || rudderCommandAngle > 120) {
             rudderCommandAngle = defaultRudderAngle;
         }
-        if (sailCommandAngle == NO_COMMAND) {
+        if (sailCommandAngle < 60 || sailCommandAngle > 120) {
             sailCommandAngle = defaultSailAngle;
         }
 
