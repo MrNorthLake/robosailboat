@@ -1,6 +1,7 @@
 package fi.robosailboat.webservice.boatCommunication.controller;
 
 import fi.robosailboat.webservice.boatCommunication.dto.Command;
+import fi.robosailboat.webservice.boatCommunication.dto.PostResponse;
 import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
 import fi.robosailboat.webservice.boatCommunication.dto.WaypointData;
 import fi.robosailboat.webservice.calculation.Calculations;
@@ -25,7 +26,7 @@ public class VesselDataTransferController {
 
     @PostMapping(value = "/sensorData", consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public Command postData(@RequestBody SensorData values) {
+    public PostResponse postData(@RequestBody SensorData values) {
 
 
        /* this is just for testing*/
@@ -43,7 +44,8 @@ public class VesselDataTransferController {
         int sAngle = rnd.nextInt(61)+60;
 
         return  new Command((double)rAngle, (double)sAngle);*/
-        return calculations.getNextCommand();
+        Command next = calculations.getNextCommand();
+        return new PostResponse(next.getR(), next.getS(), next.getD());
     }
 
     public static int getCurrentWaypointIndex() {
