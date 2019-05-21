@@ -1,6 +1,9 @@
 package fi.robosailboat.webservice.web.controller;
 
 import fi.robosailboat.webservice.boatCommunication.dto.SensorData;
+import fi.robosailboat.webservice.boatCommunication.dto.WaypointData;
+import fi.robosailboat.webservice.boatCommunication.controller.VesselDataTransferController;
+import fi.robosailboat.webservice.boatCommunication.WayPointService;
 import fi.robosailboat.webservice.robosailboatLib.repository.LoggingRepository;
 import fi.robosailboat.webservice.weatherStationCommunication.SimpleMqttCallback;
 import fi.robosailboat.webservice.weatherStationCommunication.WeatherDTO;
@@ -43,6 +46,12 @@ public class WebController {
 
         model.addAttribute("heading", latestData.getCompassHeading());
         model.addAttribute("position", (latestData.getLatitude()/10000000)+", "+(latestData.getLongitude()/10000000));
+
+        int index = VesselDataTransferController.getCurrentWaypointIndex();
+        WaypointData waypointData = WayPointService.getWaypointList().get(index);
+        model.addAttribute("wpos", waypointData.getLatitude() + ", " + waypointData.getLongitude());
+        model.addAttribute("desired", VesselDataTransferController.getCurrentCommand().getD());
+
         return "index";
     }
 

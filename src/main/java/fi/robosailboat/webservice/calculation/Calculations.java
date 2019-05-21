@@ -150,6 +150,10 @@ public class Calculations {
         return new Command(rudderCommandAngle, sailCommandAngle, desiredHeading);
     }
 
+    public int getCurrentWaypointIndex() {
+        return waypointCurrentIndex;
+    }
+
     /* Calculates the command rudder angle according to the course difference. Reused code from sailingrobots. */
     public double calculateRudderAngle() {
         if (desiredHeading != DATA_OUT_OF_RANGE && vesselHeading != DATA_OUT_OF_RANGE) {

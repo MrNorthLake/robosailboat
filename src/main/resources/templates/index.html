@@ -14,6 +14,8 @@
           updateWindSpeed();
           updateHeading();
           updatePosition();
+          updateWaypoint();
+          updateDesired();
         } catch (e) {
           console.log(e);
         }
@@ -38,6 +40,16 @@
           $("#position").replaceWith(position);
         });
       }
+      function updateWaypoint() {
+        $.get("wpos", function(wpos) {
+          $("#wpos").replaceWith(wpos);
+        });
+      }
+      function updateDesired() {
+        $.get("desired", function(desired) {
+          $("#desired").replaceWith(desired);
+        });
+      }
 
       setInterval(updateValues, 1000);
     </script>
@@ -51,6 +63,8 @@
         <p>Wind Speed: <span id="windSpeed" th:text="${windSpeed}"/><p/>
         <p>Heading: <span id="heading" th:text="${heading}"/></p>
         <p>Position: <span id="position" th:text="${position}"/></p>
+        <p>Current waypoint: <span id="wpos" th:text="${wpos}"/></p>
+        <p>Desired heading: <span id="desired" th:text="${desired}"/></p>
       </article>
     </div>
     <footer class="footer">
