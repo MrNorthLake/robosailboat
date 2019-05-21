@@ -147,7 +147,7 @@ public class Calculations {
             sailCommandAngle = defaultSailAngle;
         }
 
-        return new Command(rudderCommandAngle, sailCommandAngle);
+        return new Command(rudderCommandAngle, sailCommandAngle, desiredHeading);
     }
 
     /* Calculates the command rudder angle according to the course difference. Reused code from sailingrobots. */
