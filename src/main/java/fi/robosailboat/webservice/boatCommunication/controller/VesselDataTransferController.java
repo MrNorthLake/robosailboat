@@ -18,7 +18,7 @@ import java.util.Random;
 public class VesselDataTransferController {
 
     private static Logger LOG = LoggerFactory.getLogger(VesselDataTransferController.class);
-    private Calculations calculations = new Calculations();
+    private static Calculations calculations = new Calculations();
 
     @Autowired
     private LoggingRepository loggingRepo;
@@ -46,4 +46,11 @@ public class VesselDataTransferController {
         return calculations.getNextCommand();
     }
 
+    public static int getCurrentWaypointIndex() {
+        return calculations.getCurrentWaypointIndex();
+    }
+
+    public static Command getCurrentCommand() {
+        return calculations.getNextCommand();
+    }
 }
