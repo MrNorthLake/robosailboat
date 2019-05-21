@@ -27,8 +27,8 @@ public class WriteDataToCSV {
             for (SensorData data : dataList) {
                 dataOut = new String[]{
                         data.getCreated().atZone(ZoneId.systemDefault()).toString(),
-                        String.valueOf(data.getLatitude()),
-                        String.valueOf(data.getLongitude()),
+                        String.valueOf(data.getLatitude() /10000000),
+                        String.valueOf(data.getLongitude() / 10000000),
                         String.valueOf(data.getDirection()),
                         String.valueOf(data.getCompassHeading()),
                 };
