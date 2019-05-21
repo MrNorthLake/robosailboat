@@ -24,7 +24,7 @@ public class Calculations {
     // For rudder angle calculation
     private double desiredHeading; // degrees [0, 360[ in North-East reference frame (clockwise)
     private double vesselHeading; // degrees [0, 360[ in North-East reference frame (clockwise)
-    private double maxRudderAngle = 20; // degrees
+    private double maxRudderAngle = 30; // degrees
 
     // For sail angle calculation
     private double maxSailAngle = 120; // degrees
