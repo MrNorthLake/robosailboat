@@ -80,6 +80,20 @@ public class WebController {
         return "index :: #position";
     }
 
+    @RequestMapping(value="/wpos", method=RequestMethod.GET)
+    public String getWpos(Model model) {
+        int index = VesselDataTransferController.getCurrentWaypointIndex();
+        WaypointData waypointData = WayPointService.getWaypointList().get(index);
+        model.addAttribute("wpos", waypointData.getLatitude() + ", " + waypointData.getLongitude());
+        return "index :: #wpos";
+    }
+
+    @RequestMapping(value="/desired", method=RequestMethod.GET)
+    public String getDesired(Model model) {
+        model.addAttribute("desired", VesselDataTransferController.getCurrentCommand().getD());
+        return "index :: #desired";
+    }
+
     @RequestMapping("/log")
     public String log(@RequestParam(value = "from", required = false) String from,
                       @RequestParam(value = "to", required = false) String to, Model model) {

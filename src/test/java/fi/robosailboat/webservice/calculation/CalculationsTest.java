@@ -29,12 +29,11 @@ public class CalculationsTest {
         calculations.setData(sensorData, weatherDTO);
     }
 
-    @Ignore
     @Test
     public void getNextCommand() {
         Command next = calculations.getNextCommand();
 
-        assertEquals("067", next.getR());
+        assertEquals("112", next.getR());
         assertEquals("086", next.getS());
 
         SensorData sensorData = new SensorData(601045680, 199456190, 0, 5, 30);
@@ -48,7 +47,7 @@ public class CalculationsTest {
 
         next = calculations.getNextCommand();
 
-        assertEquals("060", next.getR());
+        assertEquals("120", next.getR());
         assertEquals("094", next.getS());
     }
 
